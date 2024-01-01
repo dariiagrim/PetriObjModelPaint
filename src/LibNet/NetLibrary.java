@@ -950,7 +950,6 @@ pblic static PetriNet CreateNetThreadStartAndEnd() throws ExceptionInvalidNetStr
         PetriT moveToDevice5Transition = new PetriT("MoveToDevice5", 1.0);
         PetriT goBackTransition = new PetriT("GoBack", 5.0);
 
-
         ArrayList<ArcIn> d_In = new ArrayList<>(Arrays.asList(
                 new ArcIn(toArrivePlace, arrivalTransition, 1),
                 new ArcIn(arrivedPlace, device1Transition, 1),
@@ -1021,6 +1020,108 @@ pblic static PetriNet CreateNetThreadStartAndEnd() throws ExceptionInvalidNetStr
 
 
         PetriNet d_Net = new PetriNet("Lab6Task2", d_P, d_T, d_In, d_Out);
+        PetriP.initNext();
+        PetriT.initNext();
+        ArcIn.initNext();
+        ArcOut.initNext();
+
+        return d_Net;
+    }
+
+    public static PetriNet CreateNetLab6Task3() throws ExceptionInvalidNetStructure, ExceptionInvalidTimeDelay {
+        PetriP toArrivePlace = new PetriP("ToArrive", 1);
+        PetriP newOrdersPlace = new PetriP("NewOrders", 0);
+        PetriP lostCustomersPlace = new PetriP("LostCustomers", 0);
+        PetriP waitingForSupplyPlace = new PetriP("WaitingForSupply", 0);
+        PetriP successfulOrdersPlace = new PetriP("SuccessfulOrders", 0);
+        PetriP storagePlace = new PetriP("Storage", 72);
+        PetriP toCheckPlaceOrderPlace = new PetriP("ToCheckPlaceOrder", 1);
+        PetriP readyToDecidePlace = new PetriP("ReadyToDecide", 0);
+        PetriP toPlaceSupplyOrderPlace = new PetriP("PlacedSupplyOrder", 0);
+        PetriP placedSupplyOrdersPlace = new PetriP("PlacedSupplyOrders", 0);
+        PetriP notPlacedSupplyOrdersPlace = new PetriP("NotPlacedSupplyOrders", 0);
+        PetriP currentStatePlace = new PetriP("CurrentState", 72);
+
+        PetriT newOrderArrivalTransition = new PetriT("NewOrderArrival", 0.2);
+        newOrderArrivalTransition.setDistribution("exp", newOrderArrivalTransition.getTimeServ());
+        newOrderArrivalTransition.setParamDeviation(0.0);
+        PetriT buyTransition = new PetriT("Buy", 0.0);
+        buyTransition.setPriority(5);
+        PetriT leaveTransition = new PetriT("Leave", 0.0);
+        leaveTransition.setProbability(0.8);
+        leaveTransition.setMoments(true);
+        PetriT waitForSupplyTransition = new PetriT("WaitForSupply", 0.0);
+        waitForSupplyTransition.setProbability(0.2);
+        PetriT buyAfterWaitTransition = new PetriT("BuyAfterWait", 0.0);
+        PetriT checkTransition = new PetriT("Check", 4.0);
+        PetriT placeSupplyOrderTransition = new PetriT("PlaceSupplyOrder", 0);
+        PetriT waitForSupplyOrderTransition = new PetriT("WaitForSupplyOrder", 3.0);
+        PetriT doNotPlaceSupplyOrderTransition = new PetriT("DoNotPlaceSupplyOrder", 0.0);
+        doNotPlaceSupplyOrderTransition.setPriority(5);
+
+        ArrayList<ArcIn> d_In = new ArrayList<>(Arrays.asList(
+                new ArcIn(toArrivePlace, newOrderArrivalTransition, 1),
+                new ArcIn(newOrdersPlace, buyTransition, 1),
+                new ArcIn(newOrdersPlace, waitForSupplyTransition, 1),
+                new ArcIn(newOrdersPlace, leaveTransition, 1),
+                new ArcIn(waitingForSupplyPlace, buyAfterWaitTransition, 1),
+                new ArcIn(storagePlace, buyAfterWaitTransition, 1),
+                new ArcIn(storagePlace, buyTransition, 1),
+                new ArcIn(currentStatePlace, waitForSupplyTransition, 1),
+                new ArcIn(currentStatePlace, buyTransition, 1),
+                new ArcIn(currentStatePlace, doNotPlaceSupplyOrderTransition, 19, true),
+                new ArcIn(toCheckPlaceOrderPlace, checkTransition, 1),
+                new ArcIn(toPlaceSupplyOrderPlace, waitForSupplyOrderTransition, 1),
+                new ArcIn(readyToDecidePlace, placeSupplyOrderTransition, 1),
+                new ArcIn(readyToDecidePlace, doNotPlaceSupplyOrderTransition, 1)
+        ));
+
+        ArrayList<ArcOut> d_Out = new ArrayList<>(Arrays.asList(
+                new ArcOut(newOrderArrivalTransition, toArrivePlace, 1),
+                new ArcOut(newOrderArrivalTransition, newOrdersPlace, 1),
+                new ArcOut(leaveTransition, lostCustomersPlace, 1),
+                new ArcOut(buyTransition, successfulOrdersPlace, 1),
+                new ArcOut(waitForSupplyTransition, waitingForSupplyPlace, 1),
+                new ArcOut(buyAfterWaitTransition, successfulOrdersPlace, 1),
+                new ArcOut(checkTransition, toCheckPlaceOrderPlace, 1),
+                new ArcOut(checkTransition, readyToDecidePlace, 1),
+                new ArcOut(doNotPlaceSupplyOrderTransition, notPlacedSupplyOrdersPlace, 1),
+                new ArcOut(placeSupplyOrderTransition, placedSupplyOrdersPlace, 1),
+                new ArcOut(placeSupplyOrderTransition, toPlaceSupplyOrderPlace, 1),
+                new ArcOut(placeSupplyOrderTransition, currentStatePlace, 72),
+                new ArcOut(waitForSupplyOrderTransition, storagePlace, 72)
+        ));
+
+
+        ArrayList<PetriP> d_P = new ArrayList<>(Arrays.asList(
+                toArrivePlace,
+                newOrdersPlace,
+                lostCustomersPlace,
+                waitingForSupplyPlace,
+                successfulOrdersPlace,
+                storagePlace,
+                toCheckPlaceOrderPlace,
+                readyToDecidePlace,
+                toPlaceSupplyOrderPlace,
+                placedSupplyOrdersPlace,
+                notPlacedSupplyOrdersPlace,
+                currentStatePlace
+        ));
+
+        ArrayList<PetriT> d_T = new ArrayList<>(Arrays.asList(
+                newOrderArrivalTransition,
+                buyTransition,
+                leaveTransition,
+                waitForSupplyTransition,
+                buyAfterWaitTransition,
+                checkTransition,
+                placeSupplyOrderTransition,
+                waitForSupplyOrderTransition,
+                doNotPlaceSupplyOrderTransition
+        ));
+
+
+        PetriNet d_Net = new PetriNet("Lab6Task3", d_P, d_T, d_In, d_Out);
         PetriP.initNext();
         PetriT.initNext();
         ArcIn.initNext();
