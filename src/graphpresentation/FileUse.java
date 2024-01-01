@@ -46,13 +46,9 @@ import graphnet.GraphPetriNet;
 import java.awt.Component;
 
 import java.awt.geom.Point2D;
-import java.lang.reflect.InvocationTargetException;
 import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedList;
 import java.util.Objects;
-import net.openhft.compiler.CompilerUtils;
 
 import utils.Utils;
 

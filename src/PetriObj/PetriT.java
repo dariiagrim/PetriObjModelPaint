@@ -576,13 +576,13 @@ public class PetriT extends PetriMainElement implements Cloneable, Serializable 
      * output.<br>
      * This method provides tokens input in the transition.
      *
-     * @param pp array of Petri net places
+     * @param places array of Petri net places
      * @param currentTime current time
      */
-    public void actIn(PetriP[] pp, double currentTime) {
-        if (this.condition(pp) == true) {
+    public void actIn(PetriP[] places, double currentTime) {
+        if (this.condition(places)) {
             for (int i = 0; i < inP.size(); i++) {
-                pp[inP.get(i)].decreaseMark(quantIn.get(i));
+                places[inP.get(i)].decreaseMark(quantIn.get(i));
             }
             if (buffer == 0) {
                 timeOut.set(0, currentTime + this.getTimeServ());

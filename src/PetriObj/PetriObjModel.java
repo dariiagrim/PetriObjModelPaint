@@ -143,7 +143,7 @@ public class PetriObjModel implements Serializable, Cloneable  {
         for (PetriSim e : getListObj()) { //edited 9.11.2015, 18.07.2018
             e.input();
         }
-        if (isProtocolPrint() == true) {
+        if (isProtocolPrint()) {
             for (PetriSim e : getListObj()) {
                 e.printMark();
             }
@@ -167,7 +167,7 @@ public class PetriObjModel implements Serializable, Cloneable  {
              return;
             
              }*/
-            if (isStatistics() == true) {
+            if (isStatistics()) {
                 for (PetriSim e : getListObj()) {
                    if (min > 0) {
                         if(min<this.getSimulationTime())
@@ -181,7 +181,7 @@ public class PetriObjModel implements Serializable, Cloneable  {
 
            this.setCurrentTime(min); // просування часу //3.12.2015
             
-            if (isProtocolPrint() == true) {
+            if (isProtocolPrint()) {
                 System.out.println(" Time progress: time = " + this.getCurrentTime() + "\n");
             }
             if (this.getCurrentTime() <= this.getSimulationTime()) {
@@ -194,7 +194,7 @@ public class PetriObjModel implements Serializable, Cloneable  {
                 }
                 int num;
                 int max;
-                if (isProtocolPrint() == true) {
+                if (isProtocolPrint()) {
                     System.out.println(" List of conflicting objects  " + "\n");
                     for (int ii = 0; ii < conflictObj.size(); ii++) {
                         System.out.println(" K [ " + ii + "  ] = " + conflictObj.get(ii).getName() + "\n");
@@ -257,6 +257,94 @@ public class PetriObjModel implements Serializable, Cloneable  {
                     for (PetriSim e : getListObj()){ //ДРУК поточного маркірування
                           e.printMark();
                     }
+                }
+            }
+        }
+        getListObj().sort(PetriSim.getComparatorByNum()); // return the initial order in the list for a correct output of the results (in SMO test)
+    }
+
+
+    public void goWithoutPrintCheck(double timeModeling) {
+        double min;
+        this.setSimulationTime(timeModeling);
+        this.setCurrentTime(0.0);
+
+        getListObj().sort(PetriSim.getComparatorByPriority());
+        for (PetriSim e : getListObj()) {
+            e.input();
+        }
+        ArrayList<PetriSim> conflictObj = new ArrayList<>();
+        Random r = new Random();
+
+        while (this.getCurrentTime() < this.getSimulationTime()) {
+
+            conflictObj.clear();
+
+            min = getListObj().get(0).getTimeMin();
+
+            for (PetriSim e : getListObj()) {
+                if (e.getTimeMin() < min) {
+                    min = e.getTimeMin();
+                }
+            }
+
+            if (isStatistics()) {
+                for (PetriSim e : getListObj()) {
+                    if (min > 0) {
+                        if(min<this.getSimulationTime())
+                            e.doStatistics((min - this.getCurrentTime()) / min); //статистика за час "дельта т", для спільних позицій потрібно статистику збирати тільки один раз!!!
+                        else
+                            e.doStatistics((this.getSimulationTime() - this.getCurrentTime()) / this.getSimulationTime());
+                    }
+
+                }
+            }
+
+            this.setCurrentTime(min);
+
+            if (this.getCurrentTime() <= this.getSimulationTime()) {
+
+                for (PetriSim sim : getListObj()) {
+                    if (this.getCurrentTime() == sim.getTimeMin())
+                    {
+                        conflictObj.add(sim);
+                    }
+                }
+                int num;
+                int max;
+
+                if (conflictObj.size() > 1) {
+                    max = conflictObj.size();
+                    conflictObj.sort(PetriSim.getComparatorByPriority());
+                    for (int i = 1; i < conflictObj.size(); i++) {
+                        if (conflictObj.get(i).getPriority() < conflictObj.get(i - 1).getPriority()) {
+                            max = i - 1;
+                            break;
+                        }
+
+                    }
+                    if (max == 0) {
+                        num = 0;
+                    } else {
+                        num = r.nextInt(max);
+                    }
+                } else {
+                    num = 0;
+                }
+
+                for (PetriSim sim: getListObj()) {
+                    if (sim.getNumObj() == conflictObj.get(num).getNumObj()) {
+                        sim.doT();
+                        sim.output();
+                    }
+                }
+
+                Collections.shuffle(getListObj());
+                getListObj().sort(PetriSim.getComparatorByPriority());
+
+                for (PetriSim e : getListObj()) {
+                    e.input();
+
                 }
             }
         }

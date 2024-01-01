@@ -203,7 +203,7 @@ public class PetriSim implements Cloneable, Serializable {
         ArrayList<PetriT> aT = new ArrayList<PetriT>();
 
         for (PetriT transition : listT) {
-            if ((transition.condition(listP) == true) && (transition.getProbability() != 0)) {
+            if ((transition.condition(listP)) && (transition.getProbability() != 0)) {
                 aT.add(transition);
 
             }
@@ -384,12 +384,12 @@ public class PetriSim implements Cloneable, Serializable {
 
        ArrayList<PetriT> activeT = this.findActiveT();     //формування списку активних переходів
 
-        if (activeT.isEmpty() && isBufferEmpty() == true) { //зупинка імітації за умови, що
+        if (activeT.isEmpty() && isBufferEmpty()) { //зупинка імітації за умови, що
             //не має переходів, які запускаються,і не має маркерів у переходах
             timeMin = Double.MAX_VALUE;
             //eventMin = null;  // 19.07.2018 by Sasha animation
         } else {
-            while (activeT.size() > 0) {//запуск переходів доки можливо
+            while (!activeT.isEmpty()) {//запуск переходів доки можливо
 
                 this.doConflikt(activeT).actIn(listP, this.getCurrentTime()); //розв'язання конфліктів
                 activeT = this.findActiveT(); //оновлення списку активних переходів
@@ -426,6 +426,9 @@ public class PetriSim implements Cloneable, Serializable {
                         while (u == true) {
                             transition.minEvent();
                             if (transition.getMinTime() == this.getCurrentTime()) {
+                                if (Objects.equals(transition.getName(), "Arrival")) {
+                                    System.out.println("arrival");
+                                }
                                 transition.actOut(listP, this.getCurrentTime());
                              } else {
                                 u = false;
