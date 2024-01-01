@@ -1129,4 +1129,69 @@ pblic static PetriNet CreateNetThreadStartAndEnd() throws ExceptionInvalidNetStr
 
         return d_Net;
     }
+
+    public static PetriNet CreateNetLab6Task4() throws ExceptionInvalidNetStructure, ExceptionInvalidTimeDelay {
+        PetriP toArrivePlace = new PetriP("ToArrive", 1);
+        PetriP arrivedPlace = new PetriP("Arrived", 0);
+        PetriP requestsToMainServerPlace = new PetriP("RequestsToMainServer", 0);
+        PetriP requestsToServerPlace = new PetriP("RequestsToServer", 0);
+        PetriP processedMainServerPlace = new PetriP("ProcessedMainServer", 0);
+        PetriP processedServerPlace = new PetriP("ProcessedServer", 0);
+
+        PetriT arrivalTransition = new PetriT("Arrival", 0.1);
+        arrivalTransition.setDistribution("exp", arrivalTransition.getTimeServ());
+        arrivalTransition.setParamDeviation(0.0);
+        PetriT toMainServerTransition = new PetriT("ToMainServer", 0.0);
+        toMainServerTransition.setProbability(0.7);
+        PetriT toServerTransition = new PetriT("ToServer", 0.0);
+        toServerTransition.setProbability(0.3);
+        PetriT processMainServerTransition = new PetriT("ProcessMainServer", 0.2);
+        processMainServerTransition.setDistribution("exp", processMainServerTransition.getTimeServ());
+        processMainServerTransition.setParamDeviation(0.0);
+        PetriT processServerTransition = new PetriT("ProcessServer", 0.3);
+        processServerTransition.setDistribution("exp", processServerTransition.getTimeServ());
+        processServerTransition.setParamDeviation(0.0);
+
+        ArrayList<ArcIn> d_In = new ArrayList<>(Arrays.asList(
+                new ArcIn(toArrivePlace, arrivalTransition, 1),
+                new ArcIn(arrivedPlace, toMainServerTransition, 1),
+                new ArcIn(arrivedPlace, toServerTransition, 1),
+                new ArcIn(requestsToMainServerPlace, processMainServerTransition, 1),
+                new ArcIn(requestsToServerPlace, processServerTransition, 1)
+        ));
+
+        ArrayList<ArcOut> d_Out = new ArrayList<>(Arrays.asList(
+                new ArcOut(arrivalTransition, arrivedPlace, 1),
+                new ArcOut(arrivalTransition, toArrivePlace, 1),
+                new ArcOut(toMainServerTransition, requestsToMainServerPlace, 1),
+                new ArcOut(toServerTransition, requestsToServerPlace, 1),
+                new ArcOut(processMainServerTransition, processedMainServerPlace, 1),
+                new ArcOut(processServerTransition, processedServerPlace, 1)
+        ));
+
+        ArrayList<PetriP> d_P = new ArrayList<>(Arrays.asList(
+                toArrivePlace,
+                arrivedPlace,
+                requestsToMainServerPlace,
+                requestsToServerPlace,
+                processedMainServerPlace,
+                processedServerPlace
+        ));
+
+        ArrayList<PetriT> d_T = new ArrayList<>(Arrays.asList(
+                arrivalTransition,
+                toMainServerTransition,
+                toServerTransition,
+                processMainServerTransition,
+                processServerTransition
+        ));
+
+        PetriNet d_Net = new PetriNet("Lab6Task4", d_P, d_T, d_In, d_Out);
+        PetriP.initNext();
+        PetriT.initNext();
+        ArcIn.initNext();
+        ArcOut.initNext();
+
+        return d_Net;
+    }
 }
