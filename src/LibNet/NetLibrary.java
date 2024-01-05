@@ -948,7 +948,7 @@ pblic static PetriNet CreateNetThreadStartAndEnd() throws ExceptionInvalidNetStr
         PetriT moveToDevice3Transition = new PetriT("MoveToDevice3", 1.0);
         PetriT moveToDevice4Transition = new PetriT("MoveToDevice4", 1.0);
         PetriT moveToDevice5Transition = new PetriT("MoveToDevice5", 1.0);
-        PetriT goBackTransition = new PetriT("GoBack", 5.0);
+        PetriT goBackTransition = new PetriT("GoBack", 1.0);
 
         ArrayList<ArcIn> d_In = new ArrayList<>(Arrays.asList(
                 new ArcIn(toArrivePlace, arrivalTransition, 1),
@@ -1055,7 +1055,7 @@ pblic static PetriNet CreateNetThreadStartAndEnd() throws ExceptionInvalidNetStr
         PetriT buyAfterWaitTransition = new PetriT("BuyAfterWait", 0.0);
         PetriT checkTransition = new PetriT("Check", 4.0);
         PetriT placeSupplyOrderTransition = new PetriT("PlaceSupplyOrder", 0);
-        PetriT waitForSupplyOrderTransition = new PetriT("WaitForSupplyOrder", 3.0);
+        PetriT waitForSupplyOrderTransition = new PetriT("WaitForSupplyOrder", 0.5);
         PetriT doNotPlaceSupplyOrderTransition = new PetriT("DoNotPlaceSupplyOrder", 0.0);
         doNotPlaceSupplyOrderTransition.setPriority(5);
 
@@ -1187,6 +1187,695 @@ pblic static PetriNet CreateNetThreadStartAndEnd() throws ExceptionInvalidNetStr
         ));
 
         PetriNet d_Net = new PetriNet("Lab6Task4", d_P, d_T, d_In, d_Out);
+        PetriP.initNext();
+        PetriT.initNext();
+        ArcIn.initNext();
+        ArcOut.initNext();
+
+        return d_Net;
+    }
+
+    public static PetriNet CreateNetCoursework() throws ExceptionInvalidNetStructure, ExceptionInvalidTimeDelay {
+        //shared places
+        PetriP passengersUpPlace = new PetriP("PassengersUp", 0);
+        PetriP passengersDownPlace = new PetriP("PassengersDown", 0);
+        PetriP passengersTo1FloorPlace = new PetriP("PassengersTo1Floor", 0);
+        PetriP passengersTo2FloorPlace = new PetriP("PassengersTo2Floor", 0);
+        PetriP passengersTo3FloorPlace = new PetriP("PassengersTo3Floor", 0);
+        PetriP passengersTo4FloorPlace = new PetriP("PassengersTo4Floor", 0);
+        PetriP passengersTo5FloorPlace = new PetriP("PassengersTo5Floor", 0);
+        PetriP availablePlacesPlace = new PetriP("AvailablePlaces", 6);
+        PetriP directionUpPlace = new PetriP("DirectionUp", 1);
+        PetriP directionDownPlace = new PetriP("DirectionDown", 0);
+
+
+        //1 floor
+        PetriP toArrive1FloorPlace = new PetriP("ToArrive1Floor", 1);
+        PetriP waiting1FloorPlace = new PetriP("Waiting1Floor", 0);
+        PetriP noActiveExit1FloorPlace = new PetriP("NoActiveExit1Floor", 1);
+        PetriP noActiveEnter1FloorPlace = new PetriP("NoActiveEnter1Floor", 1);
+
+        PetriT arrive1FloorTransition = new PetriT("Arrive1Floor", 1.0);
+        arrive1FloorTransition.setDistribution("exp", arrive1FloorTransition.getTimeServ());
+        arrive1FloorTransition.setParamDeviation(0.0);
+        PetriT enterToMove1To2Transition = new PetriT("EnterToMove1To2", 0.0);
+        enterToMove1To2Transition.setProbability(0.25);
+        enterToMove1To2Transition.setPriority(5);
+        PetriT enterToMove1To3Transition = new PetriT("EnterToMove1To3", 0.0);
+        enterToMove1To3Transition.setProbability(0.25);
+        enterToMove1To3Transition.setPriority(5);
+        PetriT enterToMove1To4Transition = new PetriT("EnterToMove1To4", 0.0);
+        enterToMove1To4Transition.setProbability(0.25);
+        enterToMove1To4Transition.setPriority(5);
+        PetriT enterToMove1To5Transition = new PetriT("EnterToMove1To5", 0.0);
+        enterToMove1To5Transition.setProbability(0.25);
+        enterToMove1To5Transition.setPriority(5);
+        PetriT switchDirectionUpOn1FloorTransition = new PetriT("SwitchDirectionUpOn1Floor", 0.0);
+
+
+        //1 -> 2 floor
+        PetriP elevatorOn1FloorPlace = new PetriP("ElevatorOn1Floor", 1);
+
+        PetriT move1To2Transition = new PetriT("Move1To2", 0.4);
+        move1To2Transition.setPriority(3);
+
+        //2 floor
+        PetriP peopleOn2FloorPlace = new PetriP("PeopleOn2Floor", 0);
+        PetriP removeFromUpOrDownPassengers2FloorPlace = new PetriP("ToRemoveFromUpOrDownPassengers2Floor", 0);
+        PetriP removedFromUpPassengers2FloorPlace = new PetriP("RemovedFromUpPassengers2Floor", 0);
+        PetriP removedFromDownPassengers2FloorPlace = new PetriP("RemovedFromDown2FloorPassengers", 0);
+        PetriP waitingOn2FloorPlace = new PetriP("WaitingOn2Floor", 0);
+        PetriP noActiveExit2FloorPlace = new PetriP("NoActiveExit2Floor", 1);
+        PetriP noActiveEnter2FloorPlace = new PetriP("NoActiveEnter2Floor", 1);
+
+        PetriT exitOn2FloorTransition = new PetriT("ExitOn2Floor", 0.4);
+        exitOn2FloorTransition.setPriority(10);
+        PetriT removeFromUpPassengers2FloorTransition = new PetriT("RemoveFromUpPassengers2Floor", 0.0);
+        removeFromUpPassengers2FloorTransition.setPriority(5);
+        PetriT removeFromDownPassengers2FloorTransition = new PetriT("RemoveFromDown2FloorPassengers", 0.0);
+        removeFromDownPassengers2FloorTransition.setPriority(5);
+        PetriT spendTimeOn2FloorTransition = new PetriT("SpendTimeOn2Floor", 120.0);
+        spendTimeOn2FloorTransition.setDistribution("unif", spendTimeOn2FloorTransition.getTimeServ());
+        spendTimeOn2FloorTransition.setParamDeviation(15.0);
+        PetriT enterToMove2To1Transition = new PetriT("EnterToMove2To1", 0.0);
+        enterToMove2To1Transition.setProbability(0.7);
+        enterToMove2To1Transition.setPriority(5);
+        PetriT enterToMove2To3Transition = new PetriT("EnterToMove2To3", 0.0);
+        enterToMove2To3Transition.setProbability(0.1);
+        enterToMove2To3Transition.setPriority(5);
+        PetriT enterToMove2To4Transition = new PetriT("EnterToMove2To4", 0.0);
+        enterToMove2To4Transition.setProbability(0.1);
+        enterToMove2To4Transition.setPriority(5);
+        PetriT enterToMove2To5Transition = new PetriT("EnterToMove2To5", 0.0);
+        enterToMove2To5Transition.setProbability(0.1);
+        enterToMove2To5Transition.setPriority(5);
+        PetriT switchDirectionUpOn2FloorTransition = new PetriT("SwitchDirectionUpOn2Floor", 0.0);
+        PetriT switchDirectionDownOn2FloorTransition = new PetriT("SwitchDirectionDownOn2Floor", 0.0);
+
+        //2 -> 3 floor && 2 -> 1
+        PetriP elevatorOn2FloorPlace = new PetriP("ElevatorOn2Floor", 0);
+        PetriT move2To1Transition = new PetriT("Move2To1", 0.4);
+        move2To1Transition.setPriority(3);
+        PetriT move2To3Transition = new PetriT("Move2To3", 0.4);
+        move2To3Transition.setPriority(3);
+
+        // 1 floor
+        PetriT exitOn1FloorTransition = new PetriT("ExitOn1Floor", 0.4);
+        exitOn2FloorTransition.setPriority(10);
+        PetriP removeFromDownPassengers1FloorPlace = new PetriP("ToRemoveFromDownPassengers1Floor", 0);
+        PetriP removedFromDownPassengers1FloorPlace = new PetriP("RemovedFromDownPassengers1Floor", 0);
+
+        PetriT removeFromDownPassengers1FloorTransition = new PetriT("RemoveFromDownPassengers1Floor", 0.0);
+        removeFromDownPassengers1FloorTransition.setPriority(5);
+
+        //3 floor
+        PetriP peopleOn3FloorPlace = new PetriP("PeopleOn3Floor", 0);
+        PetriP removeFromUpOrDownPassengers3FloorPlace = new PetriP("ToRemoveFromUpOrDownPassengers3Floor", 0);
+        PetriP removedFromUpPassengers3FloorPlace = new PetriP("RemovedFromUpPassengers3Floor", 0);
+        PetriP removedFromDownPassengers3FloorPlace = new PetriP("RemovedFromDown3FloorPassengers", 0);
+        PetriP waitingOn3FloorPlace = new PetriP("WaitingOn3Floor", 0);
+        PetriP noActiveExit3FloorPlace = new PetriP("NoActiveExit3Floor", 1);
+        PetriP noActiveEnter3FloorPlace = new PetriP("NoActiveEnter3Floor", 1);
+
+        PetriT exitOn3FloorTransition = new PetriT("ExitOn3Floor", 0.4);
+        exitOn3FloorTransition.setPriority(10);
+        PetriT removeFromUpPassengers3FloorTransition = new PetriT("RemoveFromUpPassengers3Floor", 0.0);
+        removeFromUpPassengers3FloorTransition.setPriority(5);
+        PetriT removeFromDownPassengers3FloorTransition = new PetriT("RemoveFromDown3FloorPassengers", 0.0);
+        removeFromDownPassengers3FloorTransition.setPriority(5);
+        PetriT spendTimeOn3FloorTransition = new PetriT("SpendTimeOn3Floor", 120.0);
+        spendTimeOn3FloorTransition.setDistribution("unif", spendTimeOn3FloorTransition.getTimeServ());
+        spendTimeOn3FloorTransition.setParamDeviation(15.0);
+        PetriT enterToMove3To1Transition = new PetriT("EnterToMove3To1", 0.0);
+        enterToMove3To1Transition.setProbability(0.7);
+        enterToMove3To1Transition.setPriority(5);
+        PetriT enterToMove3To2Transition = new PetriT("EnterToMove3To2", 0.0);
+        enterToMove3To2Transition.setProbability(0.1);
+        enterToMove3To2Transition.setPriority(5);
+        PetriT enterToMove3To4Transition = new PetriT("EnterToMove3To4", 0.0);
+        enterToMove3To4Transition.setProbability(0.1);
+        enterToMove3To4Transition.setPriority(5);
+        PetriT enterToMove3To5Transition = new PetriT("EnterToMove3To5", 0.0);
+        enterToMove3To5Transition.setProbability(0.1);
+        enterToMove3To5Transition.setPriority(5);
+        PetriT switchDirectionUpOn3FloorTransition = new PetriT("SwitchDirectionUpOn3Floor", 0.0);
+        PetriT switchDirectionDownOn3FloorTransition = new PetriT("SwitchDirectionDownOn3Floor", 0.0);
+
+        //3 -> 4 && 3 -> 2
+        PetriP elevatorOn3FloorPlace = new PetriP("ElevatorOn3Floor", 0);
+        PetriT move3To2Transition = new PetriT("Move3To2", 0.4);
+        move3To2Transition.setPriority(3);
+        PetriT move3To4Transition = new PetriT("Move3To4", 0.4);
+        move3To4Transition.setPriority(3);
+
+
+        //4 floor
+        PetriP peopleOn4FloorPlace = new PetriP("PeopleOn4Floor", 0);
+        PetriP removeFromUpOrDownPassengers4FloorPlace = new PetriP("ToRemoveFromUpOrDownPassengers4Floor", 0);
+        PetriP removedFromUpPassengers4FloorPlace = new PetriP("RemovedFromUpPassengers4Floor", 0);
+        PetriP removedFromDownPassengers4FloorPlace = new PetriP("RemovedFromDown4FloorPassengers", 0);
+        PetriP waitingOn4FloorPlace = new PetriP("WaitingOn4Floor", 0);
+        PetriP noActiveExit4FloorPlace = new PetriP("NoActiveExit4Floor", 1);
+        PetriP noActiveEnter4FloorPlace = new PetriP("NoActiveEnter4Floor", 1);
+
+        PetriT exitOn4FloorTransition = new PetriT("ExitOn4Floor", 0.4);
+        exitOn4FloorTransition.setPriority(10);
+        PetriT removeFromUpPassengers4FloorTransition = new PetriT("RemoveFromUpPassengers4Floor", 0.0);
+        removeFromUpPassengers4FloorTransition.setPriority(5);
+        PetriT removeFromDownPassengers4FloorTransition = new PetriT("RemoveFromDown4FloorPassengers", 0.0);
+        removeFromDownPassengers4FloorTransition.setPriority(5);
+        PetriT spendTimeOn4FloorTransition = new PetriT("SpendTimeOn4Floor", 120.0);
+        spendTimeOn4FloorTransition.setDistribution("unif", spendTimeOn4FloorTransition.getTimeServ());
+        spendTimeOn4FloorTransition.setParamDeviation(15.0);
+        PetriT enterToMove4To1Transition = new PetriT("EnterToMove4To1", 0.0);
+        enterToMove4To1Transition.setProbability(0.7);
+        enterToMove4To1Transition.setPriority(5);
+        PetriT enterToMove4To2Transition = new PetriT("EnterToMove4To2", 0.0);
+        enterToMove3To2Transition.setProbability(0.1);
+        enterToMove4To2Transition.setPriority(5);
+        PetriT enterToMove4To3Transition = new PetriT("EnterToMove4To3", 0.0);
+        enterToMove4To3Transition.setProbability(0.1);
+        enterToMove4To3Transition.setPriority(5);
+        PetriT enterToMove4To5Transition = new PetriT("EnterToMove4To5", 0.0);
+        enterToMove4To5Transition.setProbability(0.1);
+        enterToMove4To5Transition.setPriority(5);
+        PetriT switchDirectionUpOn4FloorTransition = new PetriT("SwitchDirectionUpOn4Floor", 0.0);
+        PetriT switchDirectionDownOn4FloorTransition = new PetriT("SwitchDirectionDownOn4Floor", 0.0);
+
+        //4 -> 5 && 4 -> 3
+        PetriP elevatorOn4FloorPlace = new PetriP("ElevatorOn4Floor", 0);
+        PetriT move4To3Transition = new PetriT("Move4To3", 0.4);
+        move4To3Transition.setPriority(3);
+        PetriT move4To5Transition = new PetriT("Move4To5", 0.4);
+        move4To5Transition.setPriority(3);
+
+
+        //5 floor
+        PetriP peopleOn5FloorPlace = new PetriP("PeopleOn5Floor", 0);
+        PetriP removeFromUpPassengers5FloorPlace = new PetriP("ToRemoveFromUpPassengers5Floor", 0);
+        PetriP removedFromUpPassengers5FloorPlace = new PetriP("RemovedFromUpPassengers5Floor", 0);
+        PetriP waitingOn5FloorPlace = new PetriP("WaitingOn5Floor", 0);
+        PetriP noActiveExit5FloorPlace = new PetriP("NoActiveExit5Floor", 1);
+        PetriP noActiveEnter5FloorPlace = new PetriP("NoActiveEnter5Floor", 1);
+
+        PetriT exitOn5FloorTransition = new PetriT("ExitOn5Floor", 0.4);
+        exitOn5FloorTransition.setPriority(10);
+        PetriT removeFromUpPassengers5FloorTransition = new PetriT("RemoveFromUpPassengers5Floor", 0.0);
+        removeFromUpPassengers5FloorTransition.setPriority(5);
+        PetriT spendTimeOn5FloorTransition = new PetriT("SpendTimeOn5Floor", 120.0);
+        spendTimeOn5FloorTransition.setDistribution("unif", spendTimeOn5FloorTransition.getTimeServ());
+        spendTimeOn5FloorTransition.setParamDeviation(15.0);
+        PetriT enterToMove5To1Transition = new PetriT("EnterToMove5To1", 0.0);
+        enterToMove5To1Transition.setProbability(0.7);
+        enterToMove5To1Transition.setPriority(5);
+        PetriT enterToMove5To2Transition = new PetriT("EnterToMove5To2", 0.0);
+        enterToMove5To2Transition.setProbability(0.1);
+        enterToMove5To2Transition.setPriority(5);
+        PetriT enterToMove5To3Transition = new PetriT("EnterToMove5To3", 0.0);
+        enterToMove5To3Transition.setProbability(0.1);
+        enterToMove5To3Transition.setPriority(5);
+        PetriT enterToMove5To4Transition = new PetriT("EnterToMove5To4", 0.0);
+        enterToMove5To4Transition.setProbability(0.1);
+        enterToMove5To4Transition.setPriority(5);
+        PetriT switchDirectionDownOn5FloorTransition = new PetriT("SwitchDirectionDownOn5Floor", 0.0);
+
+        // 5 -> 4
+        PetriP elevatorOn5FloorPlace = new PetriP("ElevatorOn5Floor", 0);
+        PetriT move5To4Transition = new PetriT("Move5To4", 0.4);
+        move5To4Transition.setPriority(3);
+
+        ArrayList<ArcIn> d_In = new ArrayList<>(Arrays.asList(
+                //1 floor
+                new ArcIn(toArrive1FloorPlace, arrive1FloorTransition, 1),
+                new ArcIn(waiting1FloorPlace, enterToMove1To2Transition, 1),
+                new ArcIn(waiting1FloorPlace, enterToMove1To3Transition, 1),
+                new ArcIn(waiting1FloorPlace, enterToMove1To4Transition, 1),
+                new ArcIn(waiting1FloorPlace, enterToMove1To5Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove1To2Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove1To3Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove1To4Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove1To5Transition, 1),
+                new ArcIn(elevatorOn1FloorPlace, enterToMove1To2Transition, 1, true),
+                new ArcIn(elevatorOn1FloorPlace, enterToMove1To3Transition, 1, true),
+                new ArcIn(elevatorOn1FloorPlace, enterToMove1To4Transition, 1, true),
+                new ArcIn(elevatorOn1FloorPlace, enterToMove1To5Transition, 1, true),
+                new ArcIn(noActiveExit1FloorPlace, enterToMove1To2Transition, 1, true),
+                new ArcIn(noActiveExit1FloorPlace, enterToMove1To3Transition, 1, true),
+                new ArcIn(noActiveExit1FloorPlace, enterToMove1To4Transition, 1, true),
+                new ArcIn(noActiveExit1FloorPlace, enterToMove1To5Transition, 1, true),
+                new ArcIn(noActiveEnter1FloorPlace, enterToMove1To2Transition, 1),
+                new ArcIn(noActiveEnter1FloorPlace, enterToMove1To3Transition, 1),
+                new ArcIn(noActiveEnter1FloorPlace, enterToMove1To4Transition, 1),
+                new ArcIn(noActiveEnter1FloorPlace, enterToMove1To5Transition, 1),
+                new ArcIn(elevatorOn1FloorPlace, switchDirectionUpOn1FloorTransition, 1, true),
+                new ArcIn(directionDownPlace, switchDirectionUpOn1FloorTransition, 1),
+                new ArcIn(noActiveEnter1FloorPlace, switchDirectionUpOn1FloorTransition, 1, true),
+                new ArcIn(noActiveExit1FloorPlace, switchDirectionUpOn1FloorTransition, 1, true),
+                //1 -> 2 floor
+                new ArcIn(elevatorOn1FloorPlace, move1To2Transition, 1),
+                new ArcIn(passengersUpPlace, move1To2Transition, 1, true),
+                new ArcIn(noActiveExit1FloorPlace, move1To2Transition, 1, true),
+                new ArcIn(noActiveEnter1FloorPlace, move1To2Transition, 1, true),
+                new ArcIn(directionUpPlace, move1To2Transition, 1, true),
+                // 2 floor
+                new ArcIn(elevatorOn2FloorPlace, exitOn2FloorTransition, 1, true),
+                new ArcIn(passengersTo2FloorPlace, exitOn2FloorTransition, 1),
+                new ArcIn(noActiveExit2FloorPlace, exitOn2FloorTransition, 1),
+                new ArcIn(peopleOn2FloorPlace, spendTimeOn2FloorTransition, 1),
+                new ArcIn(removeFromUpOrDownPassengers2FloorPlace, removeFromUpPassengers2FloorTransition, 1),
+                new ArcIn(passengersUpPlace, removeFromUpPassengers2FloorTransition, 1),
+                new ArcIn(removeFromUpOrDownPassengers2FloorPlace, removeFromDownPassengers2FloorTransition, 1),
+                new ArcIn(passengersDownPlace, removeFromDownPassengers2FloorTransition, 1),
+                new ArcIn(directionUpPlace, removeFromUpPassengers2FloorTransition, 1, true),
+                new ArcIn(directionDownPlace, removeFromDownPassengers2FloorTransition, 1, true),
+                new ArcIn(waitingOn2FloorPlace, enterToMove2To1Transition, 1),
+                new ArcIn(waitingOn2FloorPlace, enterToMove2To3Transition, 1),
+                new ArcIn(waitingOn2FloorPlace, enterToMove2To4Transition, 1),
+                new ArcIn(waitingOn2FloorPlace, enterToMove2To5Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove2To1Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove2To3Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove2To4Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove2To5Transition, 1),
+                new ArcIn(elevatorOn2FloorPlace, enterToMove2To1Transition, 1, true),
+                new ArcIn(elevatorOn2FloorPlace, enterToMove2To3Transition, 1, true),
+                new ArcIn(elevatorOn2FloorPlace, enterToMove2To4Transition, 1, true),
+                new ArcIn(elevatorOn2FloorPlace, enterToMove2To5Transition, 1, true),
+                new ArcIn(noActiveExit2FloorPlace, enterToMove2To1Transition, 1, true),
+                new ArcIn(noActiveExit2FloorPlace, enterToMove2To3Transition, 1, true),
+                new ArcIn(noActiveExit2FloorPlace, enterToMove2To4Transition, 1, true),
+                new ArcIn(noActiveExit2FloorPlace, enterToMove2To5Transition, 1, true),
+                new ArcIn(noActiveEnter2FloorPlace, enterToMove2To1Transition, 1),
+                new ArcIn(noActiveEnter2FloorPlace, enterToMove2To3Transition, 1),
+                new ArcIn(noActiveEnter2FloorPlace, enterToMove2To4Transition, 1),
+                new ArcIn(noActiveEnter2FloorPlace, enterToMove2To5Transition, 1),
+                new ArcIn(elevatorOn2FloorPlace, switchDirectionUpOn2FloorTransition, 1, true),
+                new ArcIn(directionDownPlace, switchDirectionUpOn2FloorTransition, 1),
+                new ArcIn(noActiveEnter2FloorPlace, switchDirectionUpOn2FloorTransition, 1, true),
+                new ArcIn(noActiveExit2FloorPlace, switchDirectionUpOn2FloorTransition, 1, true),
+                new ArcIn(elevatorOn2FloorPlace, switchDirectionDownOn2FloorTransition, 1, true),
+                new ArcIn(directionUpPlace, switchDirectionDownOn2FloorTransition, 1),
+                new ArcIn(noActiveEnter2FloorPlace, switchDirectionDownOn2FloorTransition, 1, true),
+                new ArcIn(noActiveExit2FloorPlace, switchDirectionDownOn2FloorTransition, 1, true),
+                // 2 -> 1 floor
+                new ArcIn(elevatorOn2FloorPlace, move2To1Transition, 1),
+                new ArcIn(passengersDownPlace, move2To1Transition, 1, true),
+                new ArcIn(noActiveExit2FloorPlace, move2To1Transition, 1, true),
+                new ArcIn(noActiveEnter2FloorPlace, move2To1Transition, 1, true),
+                new ArcIn(directionDownPlace, move2To1Transition, 1, true),
+                // 1 floor
+                new ArcIn(elevatorOn1FloorPlace, exitOn1FloorTransition, 1, true),
+                new ArcIn(passengersTo1FloorPlace, exitOn1FloorTransition, 1),
+                new ArcIn(noActiveExit1FloorPlace, exitOn1FloorTransition, 1),
+                new ArcIn(removeFromDownPassengers1FloorPlace, removeFromDownPassengers1FloorTransition, 1),
+                new ArcIn(passengersDownPlace, removeFromDownPassengers1FloorTransition, 1),
+                // 2 -> 3 floor
+                new ArcIn(elevatorOn2FloorPlace, move2To3Transition, 1),
+                new ArcIn(passengersUpPlace, move2To3Transition, 1, true),
+                new ArcIn(noActiveExit2FloorPlace, move2To3Transition, 1, true),
+                new ArcIn(directionUpPlace, move2To3Transition, 1, true),
+                //3 floor
+                new ArcIn(elevatorOn3FloorPlace, exitOn3FloorTransition, 1, true),
+                new ArcIn(passengersTo3FloorPlace, exitOn3FloorTransition, 1),
+                new ArcIn(noActiveExit3FloorPlace, exitOn3FloorTransition, 1),
+                new ArcIn(peopleOn3FloorPlace, spendTimeOn3FloorTransition, 1),
+                new ArcIn(removeFromUpOrDownPassengers3FloorPlace, removeFromUpPassengers3FloorTransition, 1),
+                new ArcIn(passengersUpPlace, removeFromUpPassengers3FloorTransition, 1),
+                new ArcIn(removeFromUpOrDownPassengers3FloorPlace, removeFromDownPassengers3FloorTransition, 1),
+                new ArcIn(passengersDownPlace, removeFromDownPassengers3FloorTransition, 1),
+                new ArcIn(directionUpPlace, removeFromUpPassengers3FloorTransition, 1, true),
+                new ArcIn(directionDownPlace, removeFromDownPassengers3FloorTransition, 1, true),
+                new ArcIn(waitingOn3FloorPlace, enterToMove3To1Transition, 1),
+                new ArcIn(waitingOn3FloorPlace, enterToMove3To2Transition, 1),
+                new ArcIn(waitingOn3FloorPlace, enterToMove3To4Transition, 1),
+                new ArcIn(waitingOn3FloorPlace, enterToMove3To5Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove3To1Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove3To2Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove3To4Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove3To5Transition, 1),
+                new ArcIn(elevatorOn3FloorPlace, enterToMove3To1Transition, 1, true),
+                new ArcIn(elevatorOn3FloorPlace, enterToMove3To2Transition, 1, true),
+                new ArcIn(elevatorOn3FloorPlace, enterToMove3To4Transition, 1, true),
+                new ArcIn(elevatorOn3FloorPlace, enterToMove3To5Transition, 1, true),
+                new ArcIn(noActiveExit3FloorPlace, enterToMove3To1Transition, 1, true),
+                new ArcIn(noActiveExit3FloorPlace, enterToMove3To2Transition, 1, true),
+                new ArcIn(noActiveExit3FloorPlace, enterToMove3To4Transition, 1, true),
+                new ArcIn(noActiveExit3FloorPlace, enterToMove3To5Transition, 1, true),
+                new ArcIn(noActiveEnter3FloorPlace, enterToMove3To1Transition, 1),
+                new ArcIn(noActiveEnter3FloorPlace, enterToMove3To2Transition, 1),
+                new ArcIn(noActiveEnter3FloorPlace, enterToMove3To4Transition, 1),
+                new ArcIn(noActiveEnter3FloorPlace, enterToMove3To5Transition, 1),
+                new ArcIn(elevatorOn3FloorPlace, switchDirectionUpOn3FloorTransition, 1, true),
+                new ArcIn(directionDownPlace, switchDirectionUpOn3FloorTransition, 1),
+                new ArcIn(noActiveEnter3FloorPlace, switchDirectionUpOn3FloorTransition, 1, true),
+                new ArcIn(noActiveExit3FloorPlace, switchDirectionUpOn3FloorTransition, 1, true),
+                new ArcIn(elevatorOn3FloorPlace, switchDirectionDownOn3FloorTransition, 1, true),
+                new ArcIn(directionUpPlace, switchDirectionDownOn3FloorTransition, 1),
+                new ArcIn(noActiveEnter3FloorPlace, switchDirectionDownOn3FloorTransition, 1, true),
+                new ArcIn(noActiveExit3FloorPlace, switchDirectionDownOn3FloorTransition, 1, true),
+                // 3 -> 2 floor
+                new ArcIn(elevatorOn3FloorPlace, move3To2Transition, 1),
+                new ArcIn(passengersDownPlace, move3To2Transition, 1, true),
+                new ArcIn(noActiveExit3FloorPlace, move3To2Transition, 1, true),
+                new ArcIn(noActiveEnter3FloorPlace, move3To2Transition, 1, true),
+                new ArcIn(directionDownPlace, move3To2Transition, 1, true),
+                // 3 -> 4 floor
+                new ArcIn(elevatorOn3FloorPlace, move3To4Transition, 1),
+                new ArcIn(passengersUpPlace, move3To4Transition, 1, true),
+                new ArcIn(noActiveExit3FloorPlace, move3To4Transition, 1, true),
+                new ArcIn(noActiveEnter3FloorPlace, move3To4Transition, 1, true),
+                new ArcIn(directionUpPlace, move3To4Transition, 1, true),
+
+                //4 floor
+                new ArcIn(elevatorOn4FloorPlace, exitOn4FloorTransition, 1, true),
+                new ArcIn(passengersTo4FloorPlace, exitOn4FloorTransition, 1),
+                new ArcIn(noActiveExit4FloorPlace, exitOn4FloorTransition, 1),
+                new ArcIn(peopleOn4FloorPlace, spendTimeOn4FloorTransition, 1),
+                new ArcIn(removeFromUpOrDownPassengers4FloorPlace, removeFromUpPassengers4FloorTransition, 1),
+                new ArcIn(passengersUpPlace, removeFromUpPassengers4FloorTransition, 1),
+                new ArcIn(removeFromUpOrDownPassengers4FloorPlace, removeFromDownPassengers4FloorTransition, 1),
+                new ArcIn(passengersDownPlace, removeFromDownPassengers4FloorTransition, 1),
+                new ArcIn(directionUpPlace, removeFromUpPassengers4FloorTransition, 1, true),
+                new ArcIn(directionDownPlace, removeFromDownPassengers4FloorTransition, 1, true),
+                new ArcIn(waitingOn4FloorPlace, enterToMove4To1Transition, 1),
+                new ArcIn(waitingOn4FloorPlace, enterToMove4To2Transition, 1),
+                new ArcIn(waitingOn4FloorPlace, enterToMove4To3Transition, 1),
+                new ArcIn(waitingOn4FloorPlace, enterToMove4To5Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove4To1Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove4To2Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove4To3Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove4To5Transition, 1),
+                new ArcIn(elevatorOn4FloorPlace, enterToMove4To1Transition, 1, true),
+                new ArcIn(elevatorOn4FloorPlace, enterToMove4To2Transition, 1, true),
+                new ArcIn(elevatorOn4FloorPlace, enterToMove4To3Transition, 1, true),
+                new ArcIn(elevatorOn4FloorPlace, enterToMove3To5Transition, 1, true),
+                new ArcIn(noActiveExit4FloorPlace, enterToMove4To1Transition, 1, true),
+                new ArcIn(noActiveExit4FloorPlace, enterToMove4To2Transition, 1, true),
+                new ArcIn(noActiveExit4FloorPlace, enterToMove4To3Transition, 1, true),
+                new ArcIn(noActiveExit4FloorPlace, enterToMove3To5Transition, 1, true),
+                new ArcIn(noActiveEnter4FloorPlace, enterToMove4To1Transition, 1),
+                new ArcIn(noActiveEnter4FloorPlace, enterToMove4To2Transition, 1),
+                new ArcIn(noActiveEnter4FloorPlace, enterToMove4To3Transition, 1),
+                new ArcIn(noActiveEnter4FloorPlace, enterToMove4To5Transition, 1),
+                new ArcIn(elevatorOn4FloorPlace, switchDirectionUpOn4FloorTransition, 1, true),
+                new ArcIn(directionDownPlace, switchDirectionUpOn4FloorTransition, 1),
+                new ArcIn(noActiveEnter4FloorPlace, switchDirectionUpOn4FloorTransition, 1, true),
+                new ArcIn(noActiveExit4FloorPlace, switchDirectionUpOn4FloorTransition, 1, true),
+                new ArcIn(elevatorOn4FloorPlace, switchDirectionDownOn4FloorTransition, 1, true),
+                new ArcIn(directionUpPlace, switchDirectionDownOn4FloorTransition, 1),
+                new ArcIn(noActiveEnter4FloorPlace, switchDirectionDownOn4FloorTransition, 1, true),
+                new ArcIn(noActiveExit4FloorPlace, switchDirectionDownOn4FloorTransition, 1, true),
+                // 4 -> 3 floor
+                new ArcIn(elevatorOn4FloorPlace, move4To3Transition, 1),
+                new ArcIn(passengersDownPlace, move4To3Transition, 1, true),
+                new ArcIn(noActiveExit4FloorPlace, move4To3Transition, 1, true),
+                new ArcIn(noActiveEnter4FloorPlace, move4To3Transition, 1, true),
+                new ArcIn(directionDownPlace, move4To3Transition, 1, true),
+                // 4 -> 5 floor
+                new ArcIn(elevatorOn4FloorPlace, move4To5Transition, 1),
+                new ArcIn(passengersUpPlace, move4To5Transition, 1, true),
+                new ArcIn(noActiveExit4FloorPlace, move4To5Transition, 1, true),
+                new ArcIn(directionUpPlace, move4To5Transition, 1, true),
+
+                //5 floor
+                new ArcIn(elevatorOn5FloorPlace, exitOn5FloorTransition, 1, true),
+                new ArcIn(passengersTo5FloorPlace, exitOn5FloorTransition, 1),
+                new ArcIn(noActiveExit5FloorPlace, exitOn5FloorTransition, 1),
+                new ArcIn(peopleOn5FloorPlace, spendTimeOn5FloorTransition, 1),
+                new ArcIn(removeFromUpPassengers5FloorPlace, removeFromUpPassengers5FloorTransition, 1),
+                new ArcIn(passengersUpPlace, removeFromUpPassengers5FloorTransition, 1),
+                new ArcIn(directionUpPlace, removeFromUpPassengers5FloorTransition, 1, true),
+                new ArcIn(waitingOn5FloorPlace, enterToMove5To1Transition, 1),
+                new ArcIn(waitingOn5FloorPlace, enterToMove5To2Transition, 1),
+                new ArcIn(waitingOn5FloorPlace, enterToMove5To3Transition, 1),
+                new ArcIn(waitingOn5FloorPlace, enterToMove5To4Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove5To1Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove5To2Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove5To3Transition, 1),
+                new ArcIn(availablePlacesPlace, enterToMove5To4Transition, 1),
+                new ArcIn(elevatorOn5FloorPlace, enterToMove5To1Transition, 1, true),
+                new ArcIn(elevatorOn5FloorPlace, enterToMove5To2Transition, 1, true),
+                new ArcIn(elevatorOn5FloorPlace, enterToMove5To3Transition, 1, true),
+                new ArcIn(elevatorOn5FloorPlace, enterToMove5To4Transition, 1, true),
+                new ArcIn(noActiveExit5FloorPlace, enterToMove5To1Transition, 1, true),
+                new ArcIn(noActiveExit5FloorPlace, enterToMove5To2Transition, 1, true),
+                new ArcIn(noActiveExit5FloorPlace, enterToMove5To3Transition, 1, true),
+                new ArcIn(noActiveExit5FloorPlace, enterToMove5To4Transition, 1, true),
+                new ArcIn(noActiveEnter5FloorPlace, enterToMove5To1Transition, 1),
+                new ArcIn(noActiveEnter5FloorPlace, enterToMove5To2Transition, 1),
+                new ArcIn(noActiveEnter5FloorPlace, enterToMove5To3Transition, 1),
+                new ArcIn(noActiveEnter5FloorPlace, enterToMove5To4Transition, 1),
+                new ArcIn(elevatorOn5FloorPlace, switchDirectionDownOn5FloorTransition, 1, true),
+                new ArcIn(directionUpPlace, switchDirectionDownOn5FloorTransition, 1),
+                new ArcIn(noActiveEnter5FloorPlace, switchDirectionDownOn5FloorTransition, 1, true),
+                new ArcIn(noActiveExit5FloorPlace, switchDirectionDownOn5FloorTransition, 1, true),
+                // 5 -> 4 floor
+                new ArcIn(elevatorOn5FloorPlace, move5To4Transition, 1),
+                new ArcIn(passengersDownPlace, move5To4Transition, 1, true),
+                new ArcIn(noActiveExit5FloorPlace, move5To4Transition, 1, true),
+                new ArcIn(noActiveEnter5FloorPlace, move5To4Transition, 1, true),
+                new ArcIn(directionDownPlace, move5To4Transition, 1, true)
+        ));
+
+        ArrayList<ArcOut> d_Out = new ArrayList<>(Arrays.asList(
+                //1 floor
+                new ArcOut(arrive1FloorTransition, toArrive1FloorPlace, 1),
+                new ArcOut(arrive1FloorTransition, waiting1FloorPlace, 1),
+                new ArcOut(enterToMove1To2Transition, passengersUpPlace, 1),
+                new ArcOut(enterToMove1To3Transition, passengersUpPlace, 1),
+                new ArcOut(enterToMove1To4Transition, passengersUpPlace, 1),
+                new ArcOut(enterToMove1To5Transition, passengersUpPlace, 1),
+                new ArcOut(enterToMove1To2Transition, passengersTo2FloorPlace, 1),
+                new ArcOut(enterToMove1To3Transition, passengersTo3FloorPlace, 1),
+                new ArcOut(enterToMove1To4Transition, passengersTo4FloorPlace, 1),
+                new ArcOut(enterToMove1To5Transition, passengersTo5FloorPlace, 1),
+                new ArcOut(enterToMove1To2Transition, noActiveEnter1FloorPlace, 1),
+                new ArcOut(enterToMove1To3Transition, noActiveEnter1FloorPlace, 1),
+                new ArcOut(enterToMove1To4Transition, noActiveEnter1FloorPlace, 1),
+                new ArcOut(enterToMove1To5Transition, noActiveEnter1FloorPlace, 1),
+                new ArcOut(switchDirectionUpOn1FloorTransition, directionUpPlace, 1),
+                //1 ->2 floor
+                new ArcOut(move1To2Transition, elevatorOn2FloorPlace, 1),
+                //2 floor
+                new ArcOut(exitOn2FloorTransition, peopleOn2FloorPlace, 1),
+                new ArcOut(exitOn2FloorTransition, removeFromUpOrDownPassengers2FloorPlace, 1),
+                new ArcOut(exitOn2FloorTransition, availablePlacesPlace, 1),
+                new ArcOut(removeFromDownPassengers2FloorTransition, removedFromDownPassengers2FloorPlace, 1),
+                new ArcOut(removeFromDownPassengers2FloorTransition, noActiveExit2FloorPlace, 1),
+                new ArcOut(removeFromUpPassengers2FloorTransition, removedFromUpPassengers2FloorPlace, 1),
+                new ArcOut(removeFromUpPassengers2FloorTransition, noActiveExit2FloorPlace, 1),
+                new ArcOut(spendTimeOn2FloorTransition, waitingOn2FloorPlace, 1),
+                new ArcOut(enterToMove2To1Transition, passengersTo1FloorPlace, 1),
+                new ArcOut(enterToMove2To3Transition, passengersTo3FloorPlace, 1),
+                new ArcOut(enterToMove2To4Transition, passengersTo4FloorPlace, 1),
+                new ArcOut(enterToMove2To5Transition, passengersTo5FloorPlace, 1),
+                new ArcOut(enterToMove2To1Transition, passengersDownPlace, 1),
+                new ArcOut(enterToMove2To3Transition, passengersUpPlace, 1),
+                new ArcOut(enterToMove2To4Transition, passengersUpPlace, 1),
+                new ArcOut(enterToMove2To5Transition, passengersUpPlace, 1),
+                new ArcOut(enterToMove2To1Transition, noActiveEnter2FloorPlace, 1),
+                new ArcOut(enterToMove2To3Transition, noActiveEnter2FloorPlace, 1),
+                new ArcOut(enterToMove2To4Transition, noActiveEnter2FloorPlace, 1),
+                new ArcOut(enterToMove2To5Transition, noActiveEnter2FloorPlace, 1),
+                new ArcOut(switchDirectionUpOn2FloorTransition, directionUpPlace, 1),
+                new ArcOut(switchDirectionDownOn2FloorTransition, directionDownPlace, 1),
+                //2 ->1 floor
+                new ArcOut(move2To1Transition, elevatorOn1FloorPlace, 1),
+                //1 floor
+                new ArcOut(exitOn1FloorTransition, removeFromDownPassengers1FloorPlace, 1),
+                new ArcOut(exitOn1FloorTransition, availablePlacesPlace, 1),
+                new ArcOut(removeFromDownPassengers1FloorTransition, removedFromDownPassengers1FloorPlace, 1),
+                new ArcOut(removeFromDownPassengers1FloorTransition, noActiveExit1FloorPlace, 1),
+                //2 ->3 floor
+                new ArcOut(move2To3Transition, elevatorOn3FloorPlace, 1),
+                //3 floor
+                new ArcOut(exitOn3FloorTransition, peopleOn3FloorPlace, 1),
+                new ArcOut(exitOn3FloorTransition, removeFromUpOrDownPassengers3FloorPlace, 1),
+                new ArcOut(exitOn3FloorTransition, availablePlacesPlace, 1),
+                new ArcOut(removeFromDownPassengers3FloorTransition, removedFromDownPassengers3FloorPlace, 1),
+                new ArcOut(removeFromDownPassengers3FloorTransition, noActiveExit3FloorPlace, 1),
+                new ArcOut(removeFromUpPassengers3FloorTransition, removedFromUpPassengers3FloorPlace, 1),
+                new ArcOut(removeFromUpPassengers3FloorTransition, noActiveExit3FloorPlace, 1),
+                new ArcOut(spendTimeOn3FloorTransition, waitingOn3FloorPlace, 1),
+                new ArcOut(enterToMove3To1Transition, passengersTo1FloorPlace, 1),
+                new ArcOut(enterToMove3To2Transition, passengersTo2FloorPlace, 1),
+                new ArcOut(enterToMove3To4Transition, passengersTo4FloorPlace, 1),
+                new ArcOut(enterToMove3To5Transition, passengersTo5FloorPlace, 1),
+                new ArcOut(enterToMove3To1Transition, passengersDownPlace, 1),
+                new ArcOut(enterToMove3To2Transition, passengersDownPlace, 1),
+                new ArcOut(enterToMove3To4Transition, passengersUpPlace, 1),
+                new ArcOut(enterToMove3To5Transition, passengersUpPlace, 1),
+                new ArcOut(enterToMove3To1Transition, noActiveEnter3FloorPlace, 1),
+                new ArcOut(enterToMove3To2Transition, noActiveEnter3FloorPlace, 1),
+                new ArcOut(enterToMove3To4Transition, noActiveEnter3FloorPlace, 1),
+                new ArcOut(enterToMove3To5Transition, noActiveEnter3FloorPlace, 1),
+                new ArcOut(switchDirectionUpOn3FloorTransition, directionUpPlace, 1),
+                new ArcOut(switchDirectionDownOn3FloorTransition, directionDownPlace, 1),
+                //3 ->2 floor
+                new ArcOut(move3To2Transition, elevatorOn2FloorPlace, 1),
+                //3 ->4 floor
+                new ArcOut(move3To4Transition, elevatorOn4FloorPlace, 1),
+                //4 floor
+                new ArcOut(exitOn4FloorTransition, peopleOn4FloorPlace, 1),
+                new ArcOut(exitOn4FloorTransition, removeFromUpOrDownPassengers4FloorPlace, 1),
+                new ArcOut(exitOn4FloorTransition, availablePlacesPlace, 1),
+                new ArcOut(removeFromDownPassengers4FloorTransition, removedFromDownPassengers4FloorPlace, 1),
+                new ArcOut(removeFromUpPassengers4FloorTransition, removedFromUpPassengers4FloorPlace, 1),
+                new ArcOut(removeFromDownPassengers4FloorTransition, noActiveExit4FloorPlace, 1),
+                new ArcOut(removeFromUpPassengers4FloorTransition, noActiveExit4FloorPlace, 1),
+                new ArcOut(spendTimeOn4FloorTransition, waitingOn4FloorPlace, 1),
+                new ArcOut(enterToMove4To1Transition, passengersTo1FloorPlace, 1),
+                new ArcOut(enterToMove4To2Transition, passengersTo2FloorPlace, 1),
+                new ArcOut(enterToMove4To3Transition, passengersTo3FloorPlace, 1),
+                new ArcOut(enterToMove4To5Transition, passengersTo5FloorPlace, 1),
+                new ArcOut(enterToMove4To1Transition, passengersDownPlace, 1),
+                new ArcOut(enterToMove4To2Transition, passengersDownPlace, 1),
+                new ArcOut(enterToMove4To3Transition, passengersDownPlace, 1),
+                new ArcOut(enterToMove4To5Transition, passengersUpPlace, 1),
+                new ArcOut(enterToMove4To1Transition, noActiveEnter4FloorPlace, 1),
+                new ArcOut(enterToMove4To2Transition, noActiveEnter4FloorPlace, 1),
+                new ArcOut(enterToMove4To3Transition, noActiveEnter4FloorPlace, 1),
+                new ArcOut(enterToMove4To5Transition, noActiveEnter4FloorPlace, 1),
+                new ArcOut(switchDirectionUpOn4FloorTransition, directionUpPlace, 1),
+                new ArcOut(switchDirectionDownOn4FloorTransition, directionDownPlace, 1),
+                //4 ->3 floor
+                new ArcOut(move4To3Transition, elevatorOn3FloorPlace, 1),
+                //4 ->5 floor
+                new ArcOut(move4To5Transition, elevatorOn5FloorPlace, 1),
+
+                //5 floor
+                new ArcOut(exitOn5FloorTransition, peopleOn5FloorPlace, 1),
+                new ArcOut(exitOn5FloorTransition, removeFromUpPassengers5FloorPlace, 1),
+                new ArcOut(exitOn5FloorTransition, availablePlacesPlace, 1),
+                new ArcOut(removeFromUpPassengers5FloorTransition, removedFromUpPassengers5FloorPlace, 1),
+                new ArcOut(removeFromUpPassengers5FloorTransition, noActiveExit5FloorPlace, 1),
+                new ArcOut(spendTimeOn5FloorTransition, waitingOn5FloorPlace, 1),
+                new ArcOut(enterToMove5To1Transition, passengersTo1FloorPlace, 1),
+                new ArcOut(enterToMove5To2Transition, passengersTo2FloorPlace, 1),
+                new ArcOut(enterToMove5To3Transition, passengersTo3FloorPlace, 1),
+                new ArcOut(enterToMove5To4Transition, passengersTo4FloorPlace, 1),
+                new ArcOut(enterToMove5To1Transition, passengersDownPlace, 1),
+                new ArcOut(enterToMove5To2Transition, passengersDownPlace, 1),
+                new ArcOut(enterToMove5To3Transition, passengersDownPlace, 1),
+                new ArcOut(enterToMove5To4Transition, passengersDownPlace, 1),
+                new ArcOut(enterToMove5To1Transition, noActiveEnter5FloorPlace, 1),
+                new ArcOut(enterToMove5To2Transition, noActiveEnter5FloorPlace, 1),
+                new ArcOut(enterToMove5To3Transition, noActiveEnter5FloorPlace, 1),
+                new ArcOut(enterToMove5To4Transition, noActiveEnter5FloorPlace, 1),
+                new ArcOut(switchDirectionDownOn5FloorTransition, directionDownPlace, 1),
+                //5 ->4 floor
+                new ArcOut(move5To4Transition, elevatorOn4FloorPlace, 1)
+        ));
+
+        ArrayList<PetriP> d_P = new ArrayList<>(Arrays.asList(
+                passengersUpPlace,
+                passengersDownPlace,
+                passengersTo1FloorPlace,
+                passengersTo2FloorPlace,
+                passengersTo3FloorPlace,
+                passengersTo4FloorPlace,
+                passengersTo5FloorPlace,
+                availablePlacesPlace,
+                directionUpPlace,
+                directionDownPlace,
+                toArrive1FloorPlace,
+                waiting1FloorPlace,
+                noActiveExit1FloorPlace,
+                noActiveEnter1FloorPlace,
+                elevatorOn1FloorPlace,
+                peopleOn2FloorPlace,
+                removeFromUpOrDownPassengers2FloorPlace,
+                removedFromUpPassengers2FloorPlace,
+                removedFromDownPassengers2FloorPlace,
+                waitingOn2FloorPlace,
+                noActiveExit2FloorPlace,
+                noActiveEnter2FloorPlace,
+                elevatorOn2FloorPlace,
+                removeFromDownPassengers1FloorPlace,
+                removedFromDownPassengers1FloorPlace,
+                peopleOn3FloorPlace,
+                removeFromUpOrDownPassengers3FloorPlace,
+                removedFromUpPassengers3FloorPlace,
+                removedFromDownPassengers3FloorPlace,
+                waitingOn3FloorPlace,
+                noActiveExit3FloorPlace,
+                noActiveEnter3FloorPlace,
+                elevatorOn3FloorPlace,
+                peopleOn4FloorPlace,
+                removeFromUpOrDownPassengers4FloorPlace,
+                removedFromUpPassengers4FloorPlace,
+                removedFromDownPassengers4FloorPlace,
+                waitingOn4FloorPlace,
+                noActiveExit4FloorPlace,
+                noActiveEnter4FloorPlace,
+                elevatorOn4FloorPlace,
+                peopleOn5FloorPlace,
+                removeFromUpPassengers5FloorPlace,
+                removedFromUpPassengers5FloorPlace,
+                waitingOn5FloorPlace,
+                noActiveExit5FloorPlace,
+                noActiveEnter5FloorPlace,
+                elevatorOn5FloorPlace
+        ));
+
+        ArrayList<PetriT> d_T = new ArrayList<>(Arrays.asList(
+                arrive1FloorTransition,
+                enterToMove1To2Transition,
+                enterToMove1To3Transition,
+                enterToMove1To4Transition,
+                enterToMove1To5Transition,
+                move1To2Transition,
+                exitOn2FloorTransition,
+                removeFromUpPassengers2FloorTransition,
+                removeFromDownPassengers2FloorTransition,
+                spendTimeOn2FloorTransition,
+                enterToMove2To1Transition,
+                enterToMove2To3Transition,
+                enterToMove2To4Transition,
+                enterToMove2To5Transition,
+                move2To1Transition,
+                move2To3Transition,
+                exitOn1FloorTransition,
+                removeFromDownPassengers1FloorTransition,
+                exitOn3FloorTransition,
+                removeFromUpPassengers3FloorTransition,
+                removeFromDownPassengers3FloorTransition,
+                spendTimeOn3FloorTransition,
+                enterToMove3To1Transition,
+                enterToMove3To2Transition,
+                enterToMove3To4Transition,
+                enterToMove3To5Transition,
+                move3To2Transition,
+                move3To4Transition,
+                exitOn4FloorTransition,
+                removeFromUpPassengers4FloorTransition,
+                removeFromDownPassengers4FloorTransition,
+                spendTimeOn4FloorTransition,
+                enterToMove4To1Transition,
+                enterToMove4To2Transition,
+                enterToMove4To3Transition,
+                enterToMove4To5Transition,
+                move4To3Transition,
+                move4To5Transition,
+                exitOn5FloorTransition,
+                removeFromUpPassengers5FloorTransition,
+                spendTimeOn5FloorTransition,
+                enterToMove5To1Transition,
+                enterToMove5To2Transition,
+                enterToMove5To3Transition,
+                enterToMove5To4Transition,
+                move5To4Transition,
+
+                switchDirectionUpOn1FloorTransition,
+                switchDirectionUpOn2FloorTransition,
+                switchDirectionDownOn2FloorTransition,
+                switchDirectionUpOn3FloorTransition,
+                switchDirectionDownOn3FloorTransition,
+                switchDirectionUpOn4FloorTransition,
+                switchDirectionDownOn4FloorTransition,
+                switchDirectionDownOn5FloorTransition
+        ));
+
+        PetriNet d_Net = new PetriNet("coursework", d_P, d_T, d_In, d_Out);
         PetriP.initNext();
         PetriT.initNext();
         ArcIn.initNext();

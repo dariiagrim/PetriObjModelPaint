@@ -539,7 +539,8 @@ public class PetriT extends PetriMainElement implements Cloneable, Serializable 
     public boolean condition(PetriP[] pp) { //Нумерація позицій тут відносна!!!  inP.get(i) - номер позиції у списку позицій, який побудований при конструюванні мережі Петрі, 
 
         boolean a = true;
-        boolean b = true;  // Саме тому при з"єднанні спільних позицій зміна номера не призводить до трагічних наслідків (руйнування зв"язків)!!! 
+        boolean b = true;  // Саме тому при з"єднанні спільних позицій зміна номера не призводить до трагічних наслідків (руйнування зв"язків)!!!
+
         for (int i = 0; i < inP.size(); i++) {
             if (pp[inP.get(i)].getMark() < quantIn.get(i)) {
                 a = false;

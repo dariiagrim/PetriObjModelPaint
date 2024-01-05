@@ -4,6 +4,7 @@ package PetriObj;
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
+
 import java.io.Serializable;
 import java.util.*;
 import javax.swing.JSlider;
@@ -14,18 +15,18 @@ import javax.swing.JTextArea;
  * The object of this class simulates dynamics of functioning according to Petri
  * net, given in his data field. Such object is named Petri-object.
  *
- *  @author Inna V. Stetsenko
+ * @author Inna V. Stetsenko
  */
 public class PetriSim implements Cloneable, Serializable {
     private StateTime timeState;
-   // private static double timeCurr=0;
-    
+    // private static double timeCurr=0;
+
     private String name;
     private int numObj; //поточний номер створюваного об"єкта   //додано 6 серпня
     private static int next = 1; //лічильник створених об"єктів  //додано 6 серпня
     private int priority;
     protected double timeMin; // modefier is edited on protected for the subclass access
- 
+
     private int numP;
     private int numT;
     private int numIn;
@@ -38,33 +39,33 @@ public class PetriSim implements Cloneable, Serializable {
     private PetriNet net;
     private ArrayList<PetriP> listPositionsForStatistica = new ArrayList<PetriP>();
     //..... з таким списком статистика спільних позицій працює правильно...
-    
-     private String id; //unique number of object for server
-    
+
+    private String id; //unique number of object for server
+
     /**
      * Constructs the Petri simulator with given Petri net and time modeling
      *
      * @param net Petri net that describes the dynamics of object
      */
-   public PetriSim(PetriNet net) {
+    public PetriSim(PetriNet net) {
         this(net, new StateTime());
     }
-   
+
     public PetriSim(String id, PetriNet net, StateTime timeState) {
         this(net, new StateTime());
-        
+
         this.id = id; // server set id
 
     }
-    
+
     public PetriSim(PetriNet net, StateTime timeState) {
         this.net = net;
         this.timeState = timeState;
         name = net.getName();
-        numObj = next; 
-        next++;        
+        numObj = next;
+        next++;
         timeMin = Double.MAX_VALUE;
-            
+
         listP = net.getListP();
         listT = net.getListT();
         listIn = net.getArcIn();
@@ -76,37 +77,35 @@ public class PetriSim implements Cloneable, Serializable {
         eventMin = this.getEventMin();
         priority = 0;
         listPositionsForStatistica.addAll(Arrays.asList(listP));
-        
+
         id = null; // server set id
 
     }
- 
-    
-    
-     private JSlider delaySlider = null; // added by Sasha for animation
-    
+
+
+    private JSlider delaySlider = null; // added by Sasha for animation
+
     /**
      * Constructs the Petri simulator with given Petri net and time modeling
      *
-     * @param net Petri net that describes the dynamics of object
-     * @param delaySlider use for control of the speed of the animation 
-     */    
+     * @param net         Petri net that describes the dynamics of object
+     * @param delaySlider use for control of the speed of the animation
+     */
     public PetriSim(PetriNet net, JSlider delaySlider) {
         this(net);
         this.delaySlider = delaySlider;
-     
+
     }
-    
+
     @Override
-    public PetriSim clone() throws CloneNotSupportedException{ //added 29.11.2017 by Inna
-        
+    public PetriSim clone() throws CloneNotSupportedException { //added 29.11.2017 by Inna
+
         super.clone();
-            
-       return new PetriSim(this.getNet().clone());
+
+        return new PetriSim(this.getNet().clone());
     }
-    
+
     /**
-     *
      * @return PetriNet
      */
     public PetriNet getNet() {
@@ -114,7 +113,6 @@ public class PetriSim implements Cloneable, Serializable {
     }
 
     /**
-     *
      * @return name of Petri-object
      */
     public String getName() {
@@ -122,7 +120,6 @@ public class PetriSim implements Cloneable, Serializable {
     }
 
     /**
-     *
      * @return list of places for statistics which use for statistics
      */
     public ArrayList<PetriP> getListPositionsForStatistica() {
@@ -139,7 +136,6 @@ public class PetriSim implements Cloneable, Serializable {
     }
 
     /**
-     *
      * @return the number of object
      */
     public int getNumObj() {
@@ -155,7 +151,6 @@ public class PetriSim implements Cloneable, Serializable {
         priority = a;
     }
 
-   
 
     /**
      * This method uses for describing other actions associated with transition
@@ -186,7 +181,6 @@ public class PetriSim implements Cloneable, Serializable {
     }
 
     /**
-     *
      * @return moment of next event
      */
     public double getTimeMin() {
@@ -225,7 +219,8 @@ public class PetriSim implements Cloneable, Serializable {
         }
         return aT;
     }
-       /**
+
+    /**
      * @return the timeCurr
      */
     public double getCurrentTime() {
@@ -238,6 +233,7 @@ public class PetriSim implements Cloneable, Serializable {
     public void setTimeCurr(double aTimeCurr) {
         getTimeState().setCurrentTime(aTimeCurr);
     }
+
     /**
      * @return the timeMod
      */
@@ -250,9 +246,9 @@ public class PetriSim implements Cloneable, Serializable {
      */
     public void setSimulationTime(double aTimeMod) {
         getTimeState().setSimulationTime(aTimeMod);
-       
+
     }
-    
+
     public static Comparator<PetriSim> getComparatorByPriority() {
         return new Comparator<PetriSim>() {
             @Override
@@ -267,12 +263,12 @@ public class PetriSim implements Cloneable, Serializable {
             }
         };
     }
-    
+
     public static Comparator<PetriSim> getComparatorByNum() {
         return new Comparator<PetriSim>() {
             @Override
             public int compare(PetriSim o1, PetriSim o2) {
-                if (o1.getNumObj()< o2.getNumObj()) {
+                if (o1.getNumObj() < o2.getNumObj()) {
                     return -1;
                 } else if (o1.getNumObj() == o2.getNumObj()) {
                     return 0;
@@ -294,8 +290,8 @@ public class PetriSim implements Cloneable, Serializable {
         ArrayList<PetriT> activeT = this.findActiveT();     //формування списку активних переходів
 
         if ((activeT.isEmpty() && isBufferEmpty() == true) || this.getCurrentTime() >= getSimulationTime()) { //зупинка імітації за умови, що
-                                                                                            //немає переходів, які запускаються,
-         //   stop = true;                              // і немає маркерів у переходах, або вичерпаний час моделювання
+            //немає переходів, які запускаються,
+            //   stop = true;                              // і немає маркерів у переходах, або вичерпаний час моделювання
             System.out.println("STOP in Net  " + this.getName());
             timeMin = getSimulationTime();
             for (PetriP p : listP) {
@@ -311,13 +307,13 @@ public class PetriSim implements Cloneable, Serializable {
             while (activeT.size() > 0) { //вхід маркерів в переходи доки можливо
 
                 this.doConflikt(activeT).actIn(listP, this.getCurrentTime()); //розв'язання конфліктів
-                
+
                 activeT = this.findActiveT(); //оновлення списку активних переходів
 
             }
 
             this.eventMin();//знайти найближчу подію та ії час
-            
+
             for (PetriP position : listP) {
                 position.changeMean((timeMin - this.getCurrentTime()) / getSimulationTime());
             }
@@ -331,7 +327,7 @@ public class PetriSim implements Cloneable, Serializable {
             if (this.getCurrentTime() <= getSimulationTime()) {
 
                 //Вихід маркерів
-                eventMin.actOut(listP, this.getCurrentTime() );//Вихід маркерів з переходу, що відповідає найближчому моменту часу
+                eventMin.actOut(listP, this.getCurrentTime());//Вихід маркерів з переходу, що відповідає найближчому моменту часу
 
                 if (eventMin.getBuffer() > 0) {
                     boolean u = true;
@@ -352,7 +348,7 @@ public class PetriSim implements Cloneable, Serializable {
                 for (PetriT transition : listT) {//ВАЖЛИВО!!Вихід з усіх переходів, що час виходу маркерів == поточний момент час.
 
                     if (transition.getBuffer() > 0 && transition.getMinTime() == this.getCurrentTime()) {
-                        transition.actOut(listP,this.getCurrentTime());//Вихід маркерів з переходу, що відповідає найближчому моменту часу
+                        transition.actOut(listP, this.getCurrentTime());//Вихід маркерів з переходу, що відповідає найближчому моменту часу
 
                         // this.printMark();//друкувати поточне маркування
                         if (transition.getBuffer() > 0) {
@@ -376,14 +372,22 @@ public class PetriSim implements Cloneable, Serializable {
         }
     }
 
-   
+
     /**
      * It does the transitions input markers
      */
     public void input() {//вхід маркерів в переходи Петрі-об'єкта
+        ArrayList<PetriT> activeT = this.findActiveT();//формування списку активних переходів
 
-       ArrayList<PetriT> activeT = this.findActiveT();     //формування списку активних переходів
-
+        System.out.println("\n----INPUT current time: " + this.getCurrentTime());
+        printMark();
+        Vector<Integer> beforeMarkers = new Vector<>();
+        for (PetriP p : listP) {
+            beforeMarkers.add(p.getMark());
+        }
+        for (PetriT aT : activeT) {
+            System.out.println(aT.getName());
+        }
         if (activeT.isEmpty() && isBufferEmpty()) { //зупинка імітації за умови, що
             //не має переходів, які запускаються,і не має маркерів у переходах
             timeMin = Double.MAX_VALUE;
@@ -396,30 +400,52 @@ public class PetriSim implements Cloneable, Serializable {
             }
             this.eventMin();//знайти найближчу подію та ії час
         }
+        printMark();
+        Vector<Integer> afterMarkers = new Vector<>();
+        for (PetriP p : listP) {
+            afterMarkers.add(p.getMark());
+        }
+
+        for (int i = 0; i < afterMarkers.size(); i++) {
+            if (!afterMarkers.get(i).equals(beforeMarkers.get(i))) {
+                System.out.println(listP[i].getName() + " diff: " + (afterMarkers.get(i) - beforeMarkers.get(i)));
+            }
+        }
     }
-    
-      /**
+
+    /**
      * It does the transitions output markers
      */
-   
-    public void output(){
-            if (this.getCurrentTime() <= this.getSimulationTime()) {
+
+    public void output() {
+        System.out.println("\n----OUTPUT current time: " + this.getCurrentTime());
+        System.out.println("event: " + eventMin.getName());
+        System.out.println("before: ");
+        printMark();
+
+        Vector<Integer> beforeMarkers = new Vector<>();
+        for (PetriP p : listP) {
+            beforeMarkers.add(p.getMark());
+        }
+
+
+        if (this.getCurrentTime() <= this.getSimulationTime()) {
             eventMin.actOut(listP, this.getCurrentTime());//здійснення події
             if (eventMin.getBuffer() > 0) {
                 boolean u = true;
                 while (u == true) {
                     eventMin.minEvent();
                     if (eventMin.getMinTime() == this.getCurrentTime()) {
-                        eventMin.actOut(listP,this.getCurrentTime());
+                        eventMin.actOut(listP, this.getCurrentTime());
                     } else {
                         u = false;
                     }
                 }
-
             }
             for (PetriT transition : listT) { //ВАЖЛИВО!!Вихід з усіх переходів, що час виходу маркерів == поточний момент час.
-            
+
                 if (transition.getBuffer() > 0 && transition.getMinTime() == this.getCurrentTime()) {
+                    System.out.println("extra out: " + transition.getName());
                     transition.actOut(listP, this.getCurrentTime());//Вихід маркерів з переходу, що відповідає найближчому моменту часу
                     if (transition.getBuffer() > 0) {
                         boolean u = true;
@@ -430,7 +456,7 @@ public class PetriSim implements Cloneable, Serializable {
                                     System.out.println("arrival");
                                 }
                                 transition.actOut(listP, this.getCurrentTime());
-                             } else {
+                            } else {
                                 u = false;
                             }
                         }
@@ -439,22 +465,35 @@ public class PetriSim implements Cloneable, Serializable {
             }
 
         }
+
+        System.out.println("after: ");
+        printMark();
+
+        Vector<Integer> afterMarkers = new Vector<>();
+        for (PetriP p : listP) {
+            afterMarkers.add(p.getMark());
+        }
+
+        for (int i = 0; i < afterMarkers.size(); i++) {
+            if (!afterMarkers.get(i).equals(beforeMarkers.get(i))) {
+                System.out.println(listP[i].getName() + " diff: " + (afterMarkers.get(i) - beforeMarkers.get(i)));
+            }
+        }
+
     }
-    
-    
-    
-    
+
+
     /**
      * It does the transitions input and output markers in the current moment
      */
     public void stepEvent() {  //один крок,вихід та вхід маркерів в переходи Петрі-об"єкта, використовується для множини Петрі-об'єктів
-        if(isStop()){
+        if (isStop()) {
             timeMin = Double.MAX_VALUE;
-             return; //зупинка імітації
+            return; //зупинка імітації
         }
 
         output();
-        input();  
+        input();
     }
 
     /**
@@ -471,7 +510,6 @@ public class PetriSim implements Cloneable, Serializable {
     }
 
     /**
-     *
      * @param dt - the time interval
      */
     public void doStatistics(double dt) {
@@ -516,7 +554,7 @@ public class PetriSim implements Cloneable, Serializable {
         }
     }
 
-  
+
     /**
      * Determines is all of transitions has empty buffer
      *
@@ -538,20 +576,25 @@ public class PetriSim implements Cloneable, Serializable {
      */
     public void printMark() {
         System.out.print("Mark in Net  " + this.getName() + "   ");
-        for (PetriP position : listP) {
-            System.out.print(position.getMark() + "  ");
+        ArrayList<PetriP> listCopy = new ArrayList(Arrays.asList(listP));
+
+        listCopy.sort(Comparator.comparingInt(PetriP::getMark).reversed());
+
+        for (PetriP position : listCopy) {
+            System.out.print(position.getName() + " " + position.getMark() + "|||");
         }
         System.out.println();
     }
-    public void printBuffer(){
-    System.out.print("Buffer in Net  " + this.getName() + "   ");
+
+    public void printBuffer() {
+        System.out.print("Buffer in Net  " + this.getName() + "   ");
         for (PetriT transition : listT) {
             System.out.print(transition.getBuffer() + "  ");
         }
         System.out.println();
     }
-    
-        
+
+
     public void printMark(JTextArea area) {
         area.append("\n Mark in Net  " + this.getName() + "   \n");
         for (PetriP position : listP) {
@@ -559,9 +602,8 @@ public class PetriSim implements Cloneable, Serializable {
         }
         area.append("\n");
     }
-   
+
     /**
-     *
      * @return the nearest event
      */
     public final PetriT getEventMin() {
@@ -584,7 +626,8 @@ public class PetriSim implements Cloneable, Serializable {
                 i++;
             }
             if (i == 1)
-             ; else {
+                ;
+            else {
                 double r = Math.random();
                 int j = 0;
                 double sum = 0;
@@ -619,9 +662,7 @@ public class PetriSim implements Cloneable, Serializable {
         this.eventMin();
         return (eventMin == null);
     }
-    
-    
-   
+
 
     /**
      * @param name the name to set
@@ -658,6 +699,5 @@ public class PetriSim implements Cloneable, Serializable {
         this.timeState = timeState;
     }
 
-   
 
 }

@@ -17,9 +17,7 @@ import java.util.Collections;
  */
 public class TestPetriObjSimulation {
     public static void main(String[] args) throws ExceptionInvalidTimeDelay, ExceptionInvalidNetStructure {
-//        lab6Task2();
-//        lab6Task3();
-        lab6Task4();
+        coursework();
     }
 
     public static void lab6Task2() throws ExceptionInvalidTimeDelay, ExceptionInvalidNetStructure {
@@ -37,12 +35,11 @@ public class TestPetriObjSimulation {
         System.out.println("Mean use device 4: " + transitions[4].getMean());
         System.out.println("Mean use device 5: " + transitions[5].getMean());
 
-        int meanNumberOfDevicesInUse =
-                (int) (transitions[1].getMean() +
-                        transitions[2].getMean() +
-                        transitions[3].getMean() +
-                        transitions[4].getMean() +
-                        transitions[5].getMean());
+        double meanNumberOfDevicesInUse = transitions[1].getMean() +
+                transitions[2].getMean() +
+                transitions[3].getMean() +
+                transitions[4].getMean() +
+                transitions[5].getMean();
         System.out.println("Mean number devices in use: " + meanNumberOfDevicesInUse);
 
         ArrayList<Double> arrivedMoments = new ArrayList<>();
@@ -141,4 +138,21 @@ public class TestPetriObjSimulation {
         return new PetriObjModel(list);
     }
 
+    public static void coursework() throws ExceptionInvalidTimeDelay, ExceptionInvalidNetStructure {
+        PetriObjModel model = getModelCoursework();
+        model.setIsProtokol(false);
+        double timeModeling = 1000;
+        model.go(timeModeling);
+    }
+
+    public static PetriObjModel getModelCoursework() throws ExceptionInvalidTimeDelay, ExceptionInvalidNetStructure {
+        ArrayList<PetriSim> list = new ArrayList<>();
+        list.add(new PetriSim(NetLibrary.CreateNetCoursework()));
+
+        return new PetriObjModel(list);
+    }
+
 }
+
+
+

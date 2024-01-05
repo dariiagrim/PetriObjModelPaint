@@ -253,7 +253,7 @@ public class PetriObjModel implements Serializable, Cloneable  {
 
                 }
                 if (isProtocolPrint() == true) {
-                    System.out.println("Markers input:");
+                    System.out.println("\n->>>>>Markers input:");
                     for (PetriSim e : getListObj()){ //ДРУК поточного маркірування
                           e.printMark();
                     }
