@@ -146,8 +146,107 @@ public class TestPetriObjSimulation {
     }
 
     public static PetriObjModel getModelCoursework() throws ExceptionInvalidTimeDelay, ExceptionInvalidNetStructure {
+        PetriP passengersUpPlace = new PetriP("PassengersUp", 0);
+        PetriP passengersDownPlace = new PetriP("PassengersDown", 0);
+        PetriP passengersTo1FloorPlace = new PetriP("PassengersTo1Floor", 0);
+        PetriP passengersTo2FloorPlace = new PetriP("PassengersTo2Floor", 0);
+        PetriP passengersTo3FloorPlace = new PetriP("PassengersTo3Floor", 0);
+        PetriP passengersTo4FloorPlace = new PetriP("PassengersTo4Floor", 0);
+        PetriP passengersTo5FloorPlace = new PetriP("PassengersTo5Floor", 0);
+        PetriP availablePlacesPlace = new PetriP("AvailablePlaces", 6);
+        PetriP directionUpPlace = new PetriP("DirectionUp", 1);
+        PetriP directionDownPlace = new PetriP("DirectionDown", 0);
+        PetriP elevatorOn1FloorPlace = new PetriP("ElevatorOn1Floor", 1);
+        PetriP elevatorOn2FloorPlace = new PetriP("ElevatorOn2Floor", 0);
+        PetriP elevatorOn3FloorPlace = new PetriP("ElevatorOn3Floor", 0);
+        PetriP elevatorOn4FloorPlace = new PetriP("ElevatorOn4Floor", 0);
+        PetriP elevatorOn5FloorPlace = new PetriP("ElevatorOn5Floor", 0);
+
         ArrayList<PetriSim> list = new ArrayList<>();
-        list.add(new PetriSim(NetLibrary.CreateNetCoursework()));
+        list.add(new PetriSim(NetLibrary.CreateNetFloorObject(
+                passengersUpPlace,
+                passengersDownPlace,
+                passengersTo1FloorPlace,
+                passengersTo2FloorPlace,
+                passengersTo3FloorPlace,
+                passengersTo4FloorPlace,
+                passengersTo5FloorPlace,
+                availablePlacesPlace,
+                directionUpPlace,
+                directionDownPlace,
+                null,
+                elevatorOn2FloorPlace,
+                elevatorOn1FloorPlace,
+                1
+        )));
+
+        list.add(new PetriSim(NetLibrary.CreateNetFloorObject(
+                passengersUpPlace,
+                passengersDownPlace,
+                passengersTo1FloorPlace,
+                passengersTo2FloorPlace,
+                passengersTo3FloorPlace,
+                passengersTo4FloorPlace,
+                passengersTo5FloorPlace,
+                availablePlacesPlace,
+                directionUpPlace,
+                directionDownPlace,
+                elevatorOn1FloorPlace,
+                elevatorOn3FloorPlace,
+                elevatorOn2FloorPlace,
+                2
+        )));
+
+        list.add(new PetriSim(NetLibrary.CreateNetFloorObject(
+                passengersUpPlace,
+                passengersDownPlace,
+                passengersTo1FloorPlace,
+                passengersTo2FloorPlace,
+                passengersTo3FloorPlace,
+                passengersTo4FloorPlace,
+                passengersTo5FloorPlace,
+                availablePlacesPlace,
+                directionUpPlace,
+                directionDownPlace,
+                elevatorOn2FloorPlace,
+                elevatorOn4FloorPlace,
+                elevatorOn3FloorPlace,
+                3
+        )));
+
+        list.add(new PetriSim(NetLibrary.CreateNetFloorObject(
+                passengersUpPlace,
+                passengersDownPlace,
+                passengersTo1FloorPlace,
+                passengersTo2FloorPlace,
+                passengersTo3FloorPlace,
+                passengersTo4FloorPlace,
+                passengersTo5FloorPlace,
+                availablePlacesPlace,
+                directionUpPlace,
+                directionDownPlace,
+                elevatorOn3FloorPlace,
+                elevatorOn5FloorPlace,
+                elevatorOn4FloorPlace,
+                4
+        )));
+
+        list.add(new PetriSim(NetLibrary.CreateNetFloorObject(
+                passengersUpPlace,
+                passengersDownPlace,
+                passengersTo1FloorPlace,
+                passengersTo2FloorPlace,
+                passengersTo3FloorPlace,
+                passengersTo4FloorPlace,
+                passengersTo5FloorPlace,
+                availablePlacesPlace,
+                directionUpPlace,
+                directionDownPlace,
+                elevatorOn4FloorPlace,
+               null,
+                elevatorOn5FloorPlace,
+                5
+        )));
 
         return new PetriObjModel(list);
     }

@@ -1281,7 +1281,7 @@ pblic static PetriNet CreateNetThreadStartAndEnd() throws ExceptionInvalidNetStr
 
         // 1 floor
         PetriT exitOn1FloorTransition = new PetriT("ExitOn1Floor", 0.4);
-        exitOn2FloorTransition.setPriority(10);
+        exitOn1FloorTransition.setPriority(10);
         PetriP removeFromDownPassengers1FloorPlace = new PetriP("ToRemoveFromDownPassengers1Floor", 0);
         PetriP removedFromDownPassengers1FloorPlace = new PetriP("RemovedFromDownPassengers1Floor", 0);
 
@@ -1883,4 +1883,316 @@ pblic static PetriNet CreateNetThreadStartAndEnd() throws ExceptionInvalidNetStr
 
         return d_Net;
     }
+
+
+    public static PetriNet CreateNetFloorObject(
+            PetriP passengersUpPlace,
+            PetriP passengersDownPlace,
+            PetriP passengersTo1FloorPlace,
+            PetriP passengersTo2FloorPlace,
+            PetriP passengersTo3FloorPlace,
+            PetriP passengersTo4FloorPlace,
+            PetriP passengersTo5FloorPlace,
+            PetriP availablePlacesPlace,
+            PetriP directionUpPlace,
+            PetriP directionDownPlace,
+            PetriP elevatorOnPreviousFloorPlace,
+            PetriP elevatorOnNextFloorPlace,
+            PetriP elevatorOnFloorPlace,
+            int floorNumber
+    ) throws ExceptionInvalidNetStructure, ExceptionInvalidTimeDelay {
+        ArrayList<PetriP> d_P = new ArrayList<>(Arrays.asList(
+                passengersUpPlace,
+                passengersDownPlace,
+                passengersTo1FloorPlace,
+                passengersTo2FloorPlace,
+                passengersTo3FloorPlace,
+                passengersTo4FloorPlace,
+                passengersTo5FloorPlace,
+                availablePlacesPlace,
+                directionUpPlace,
+                directionDownPlace,
+                elevatorOnFloorPlace
+        ));
+
+        if (elevatorOnPreviousFloorPlace != null) {
+            d_P.add(elevatorOnPreviousFloorPlace);
+        }
+
+        if (elevatorOnNextFloorPlace != null) {
+            d_P.add(elevatorOnNextFloorPlace);
+        }
+
+        ArrayList<PetriT> d_T = new ArrayList<>();
+        ArrayList<ArcIn> d_In = new ArrayList<>();
+        ArrayList<ArcOut> d_Out = new ArrayList<>();
+
+        PetriP peopleOnFloorPlace = new PetriP(String.format("PeopleOn%dFloor", floorNumber), 0);
+        d_P.add(peopleOnFloorPlace);
+
+        PetriP removeFromUpOrDownPassengersFloorPlace = new PetriP(String.format("ToRemoveFromUpOrDownPassengers%dFloor", floorNumber), 0);
+        d_P.add(removeFromUpOrDownPassengersFloorPlace);
+
+        PetriP removedFromUpPassengersFloorPlace = new PetriP(String.format("RemovedFromUpPassengers%dFloor", floorNumber), 0);
+        d_P.add(removedFromUpPassengersFloorPlace);
+
+        PetriP removedFromDownPassengersFloorPlace = new PetriP(String.format("RemovedFromDown%dFloorPassengers", floorNumber), 0);
+        d_P.add(removedFromDownPassengersFloorPlace);
+
+        PetriP waitingOnFloorPlace = new PetriP(String.format("WaitingOn%dFloor", floorNumber), 0);
+        d_P.add(waitingOnFloorPlace);
+
+        PetriP noActiveExitFloorPlace = new PetriP(String.format("NoActiveExit%dFloor", floorNumber), 1);
+        d_P.add(noActiveExitFloorPlace);
+
+        PetriP noActiveEnterFloorPlace = new PetriP(String.format("NoActiveEnter%dFloor", floorNumber), 1);
+        d_P.add(noActiveEnterFloorPlace);
+
+        PetriT exitOnFloorTransition = new PetriT(String.format("ExitOn%dFloor", floorNumber), 0.4);
+        exitOnFloorTransition.setPriority(10);
+        d_T.add(exitOnFloorTransition);
+
+        PetriT removeFromUpPassengersFloorTransition = new PetriT(String.format("RemoveFromUpPassengers%dFloor", floorNumber), 0.0);
+        removeFromUpPassengersFloorTransition.setPriority(5);
+        d_T.add(removeFromUpPassengersFloorTransition);
+
+        PetriT removeFromDownPassengersFloorTransition = new PetriT(String.format("RemoveFromDown%dFloorPassengers", floorNumber), 0.0);
+        removeFromDownPassengersFloorTransition.setPriority(5);
+        d_T.add(removeFromDownPassengersFloorTransition);
+
+        PetriT spendTimeOnFloorTransition = null;
+        if (floorNumber != 1) {
+            spendTimeOnFloorTransition = new PetriT(String.format("SpendTimeOn%dFloor", floorNumber), 120.0);
+            spendTimeOnFloorTransition.setDistribution("unif", spendTimeOnFloorTransition.getTimeServ());
+            spendTimeOnFloorTransition.setParamDeviation(15.0);
+            d_T.add(spendTimeOnFloorTransition);
+        }
+
+
+        ArrayList<EnterToMoveTransition> enterToMoveTransitions = getEnterToMoveTransitions(floorNumber);
+        for (EnterToMoveTransition t : enterToMoveTransitions) {
+            d_T.add(t.transition);
+        }
+
+        ArrayList<SwitchDirectionTransition> switchDirectionTransitions = getSwitchDirectionTransitions(floorNumber);
+        for (SwitchDirectionTransition t : switchDirectionTransitions) {
+            d_T.add(t.transition);
+        }
+
+        ArrayList<MoveTransition> moveTransitions = getMoveTransitions(floorNumber);
+        for (MoveTransition t : moveTransitions) {
+            d_T.add(t.transition);
+        }
+
+        PetriP currentFloorPassengersPlace = getCurrentFloorPassengersPlace(
+                passengersTo1FloorPlace,
+                passengersTo2FloorPlace,
+                passengersTo3FloorPlace,
+                passengersTo4FloorPlace,
+                passengersTo5FloorPlace,
+                floorNumber
+        );
+
+        d_In.add(new ArcIn(elevatorOnFloorPlace, exitOnFloorTransition, 1, true));
+        d_In.add(new ArcIn(currentFloorPassengersPlace, exitOnFloorTransition, 1, true));
+        d_In.add(new ArcIn(noActiveExitFloorPlace, exitOnFloorTransition, 1));
+        d_In.add(new ArcIn(noActiveExitFloorPlace, exitOnFloorTransition, 1));
+        if (spendTimeOnFloorTransition != null) {
+            d_In.add(new ArcIn(peopleOnFloorPlace, spendTimeOnFloorTransition, 1));
+        }
+
+        d_In.add(new ArcIn(removeFromUpOrDownPassengersFloorPlace, removeFromUpPassengersFloorTransition, 1));
+        d_In.add(new ArcIn(passengersUpPlace, removeFromUpPassengersFloorTransition, 1));
+        d_In.add(new ArcIn(removeFromUpOrDownPassengersFloorPlace, removeFromDownPassengersFloorTransition, 1));
+        d_In.add(new ArcIn(passengersDownPlace, removeFromDownPassengersFloorTransition, 1));
+        d_In.add(new ArcIn(removeFromUpOrDownPassengersFloorPlace, removeFromDownPassengersFloorTransition, 1));
+        d_In.add(new ArcIn(passengersDownPlace, removeFromDownPassengersFloorTransition, 1));
+        d_In.add(new ArcIn(directionUpPlace, removeFromUpPassengersFloorTransition, 1, true));
+        d_In.add(new ArcIn(directionDownPlace, removeFromDownPassengersFloorTransition, 1, true));
+
+        for (EnterToMoveTransition t : enterToMoveTransitions) {
+            d_In.add(new ArcIn(waitingOnFloorPlace, t.transition, 1));
+            d_In.add(new ArcIn(availablePlacesPlace, t.transition, 1));
+            d_In.add(new ArcIn(elevatorOnFloorPlace, t.transition, 1, true));
+            d_In.add(new ArcIn(noActiveExitFloorPlace, t.transition, 1, true));
+            d_In.add(new ArcIn(noActiveEnterFloorPlace, t.transition, 1));
+        }
+
+        for (SwitchDirectionTransition t : switchDirectionTransitions) {
+            d_In.add(new ArcIn(elevatorOnFloorPlace, t.transition, 1, true));
+            d_In.add(new ArcIn(noActiveEnterFloorPlace, t.transition, 1, true));
+            d_In.add(new ArcIn(noActiveExitFloorPlace, t.transition, 1, true));
+            if (t.isUp) {
+                d_In.add(new ArcIn(directionDownPlace, t.transition, 1));
+            } else {
+                d_In.add(new ArcIn(directionUpPlace, t.transition, 1));
+            }
+        }
+
+        for (MoveTransition t : moveTransitions) {
+            d_In.add(new ArcIn(elevatorOnFloorPlace, t.transition, 1));
+            d_In.add(new ArcIn(noActiveEnterFloorPlace, t.transition, 1, true));
+            d_In.add(new ArcIn(noActiveExitFloorPlace, t.transition, 1, true));
+            if (t.isUp) {
+                d_In.add(new ArcIn(directionUpPlace, t.transition, 1, true));
+                d_In.add(new ArcIn(passengersUpPlace, t.transition, 1, true));
+            } else {
+                d_In.add(new ArcIn(passengersDownPlace, t.transition, 1, true));
+                d_In.add(new ArcIn(directionDownPlace, t.transition, 1, true));
+            }
+        }
+
+        d_Out.add(new ArcOut(exitOnFloorTransition, peopleOnFloorPlace, 1));
+        d_Out.add(new ArcOut(exitOnFloorTransition, removeFromUpOrDownPassengersFloorPlace, 1));
+        d_Out.add(new ArcOut(exitOnFloorTransition, availablePlacesPlace, 1));
+        d_Out.add(new ArcOut(removeFromDownPassengersFloorTransition, removedFromDownPassengersFloorPlace, 1));
+        d_Out.add(new ArcOut(removeFromDownPassengersFloorTransition, noActiveExitFloorPlace, 1));
+        d_Out.add(new ArcOut(removeFromUpPassengersFloorTransition, removedFromUpPassengersFloorPlace, 1));
+        d_Out.add(new ArcOut(removeFromUpPassengersFloorTransition, noActiveExitFloorPlace, 1));
+        if (spendTimeOnFloorTransition != null) {
+            d_Out.add(new ArcOut(spendTimeOnFloorTransition, waitingOnFloorPlace, 1));
+        }
+
+        for (EnterToMoveTransition t : enterToMoveTransitions) {
+            switch (t.resultingFloor) {
+                case 2:
+                    d_Out.add(new ArcOut(t.transition, passengersTo2FloorPlace, 1));
+                case 3:
+                    d_Out.add(new ArcOut(t.transition, passengersTo3FloorPlace, 1));
+                case 4:
+                    d_Out.add(new ArcOut(t.transition, passengersTo4FloorPlace, 1));
+                case 5:
+                    d_Out.add(new ArcOut(t.transition, passengersTo5FloorPlace, 1));
+                default:
+                    d_Out.add(new ArcOut(t.transition, passengersTo1FloorPlace, 1));
+            }
+            if (t.isUp) {
+                d_Out.add(new ArcOut(t.transition, passengersUpPlace, 1));
+            } else {
+                d_Out.add(new ArcOut(t.transition, passengersDownPlace, 1));
+            }
+            d_Out.add(new ArcOut(t.transition, noActiveEnterFloorPlace, 1));
+        }
+
+        for (SwitchDirectionTransition t : switchDirectionTransitions) {
+            if (t.isUp) {
+                d_Out.add(new ArcOut(t.transition, directionUpPlace, 1));
+            } else {
+                d_Out.add(new ArcOut(t.transition, directionDownPlace, 1));
+            }
+        }
+
+        for (MoveTransition t : moveTransitions) {
+            if (t.isUp) {
+                d_Out.add(new ArcOut(t.transition, elevatorOnNextFloorPlace, 1));
+            } else {
+                d_Out.add(new ArcOut(t.transition, elevatorOnPreviousFloorPlace, 1));
+            }
+        }
+
+        PetriNet d_Net = new PetriNet(String.format("floor%d", floorNumber), d_P, d_T, d_In, d_Out);
+        PetriP.initNext();
+        PetriT.initNext();
+        ArcIn.initNext();
+        ArcOut.initNext();
+
+        return d_Net;
+    }
+
+
+    private static ArrayList<EnterToMoveTransition> getEnterToMoveTransitions(int floorNumber) {
+        ArrayList<EnterToMoveTransition> enterToMoveTransitions = new ArrayList<>();
+
+        for (int i = 1; i <= 5; i++) {
+            if (i == floorNumber) {
+                continue;
+            }
+
+            double probability = 0.1;
+
+            if (i == 1) {
+                probability = 0.7;
+            }
+
+            if (floorNumber == 1) {
+                probability = 0.25;
+            }
+
+
+            PetriT transition = new PetriT(String.format("EnterToMove%dTo%d", floorNumber, i), 0.0);
+            transition.setProbability(probability);
+            transition.setPriority(5);
+
+            EnterToMoveTransition enterToMoveTransition = new EnterToMoveTransition(transition, floorNumber < i, i);
+            enterToMoveTransitions.add(enterToMoveTransition);
+        }
+
+        return enterToMoveTransitions;
+    }
+
+    private static ArrayList<SwitchDirectionTransition> getSwitchDirectionTransitions(int floorNumber) {
+        ArrayList<SwitchDirectionTransition> switchDirectionTransitions = new ArrayList<>();
+
+        if (floorNumber != 1) {
+            PetriT upTransition = new PetriT(String.format("SwitchDirectionUpOn%dFloor", floorNumber), 0.0);
+            SwitchDirectionTransition switchDirectionUpOnFloorTransition = new SwitchDirectionTransition(upTransition, true);
+            switchDirectionTransitions.add(switchDirectionUpOnFloorTransition);
+        }
+
+        if (floorNumber != 5) {
+            PetriT upTransition = new PetriT(String.format("SwitchDirectionUpOn%dFloor", floorNumber), 0.0);
+            SwitchDirectionTransition switchDirectionUpOnFloorTransition = new SwitchDirectionTransition(upTransition, true);
+            switchDirectionTransitions.add(switchDirectionUpOnFloorTransition);
+        }
+
+        return switchDirectionTransitions;
+    }
+
+    private static ArrayList<MoveTransition> getMoveTransitions(int floorNumber) {
+        ArrayList<MoveTransition> moveTransitions = new ArrayList<>();
+
+        PetriT move2To1Transition = new PetriT("Move2To1", 0.4);
+        move2To1Transition.setPriority(3);
+        PetriT move2To3Transition = new PetriT("Move2To3", 0.4);
+        move2To3Transition.setPriority(3);
+
+        if (floorNumber != 1) {
+            PetriT previousTransition = new PetriT(String.format("Move%dTo%d", floorNumber, floorNumber - 1), 0.0);
+            previousTransition.setPriority(3);
+            MoveTransition moveToPreviousTransition = new MoveTransition(previousTransition, false);
+            moveTransitions.add(moveToPreviousTransition);
+        }
+
+        if (floorNumber != 5) {
+            PetriT nextTransition = new PetriT(String.format("Move%dTo%d", floorNumber, floorNumber + 1), 0.0);
+            nextTransition.setPriority(3);
+            MoveTransition moveToNextTransition = new MoveTransition(nextTransition, true);
+            moveTransitions.add(moveToNextTransition);
+        }
+
+        return moveTransitions;
+    }
+
+
+    private static PetriP getCurrentFloorPassengersPlace(
+            PetriP passengersTo1FloorPlace,
+            PetriP passengersTo2FloorPlace,
+            PetriP passengersTo3FloorPlace,
+            PetriP passengersTo4FloorPlace,
+            PetriP passengersTo5FloorPlace,
+            int floorNumber) {
+        switch (floorNumber) {
+            case 2:
+                return passengersTo2FloorPlace;
+            case 3:
+                return passengersTo3FloorPlace;
+            case 4:
+                return passengersTo4FloorPlace;
+            case 5:
+                return passengersTo5FloorPlace;
+            default:
+                return passengersTo1FloorPlace;
+        }
+    }
+
 }
