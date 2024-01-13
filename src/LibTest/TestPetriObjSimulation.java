@@ -17,7 +17,13 @@ import java.util.Collections;
  */
 public class TestPetriObjSimulation {
     public static void main(String[] args) throws ExceptionInvalidTimeDelay, ExceptionInvalidNetStructure {
-        coursework();
+//        coursework();
+
+
+        PetriObjModel model = getModel();
+
+        model.go(100);
+
     }
 
     public static void lab6Task2() throws ExceptionInvalidTimeDelay, ExceptionInvalidNetStructure {
@@ -243,7 +249,7 @@ public class TestPetriObjSimulation {
                 directionUpPlace,
                 directionDownPlace,
                 elevatorOn4FloorPlace,
-               null,
+                null,
                 elevatorOn5FloorPlace,
                 5
         )));
@@ -251,6 +257,154 @@ public class TestPetriObjSimulation {
         return new PetriObjModel(list);
     }
 
+
+    public static PetriObjModel getModel() throws ExceptionInvalidTimeDelay, ExceptionInvalidNetStructure {
+        ArrayList<PetriSim> list = new ArrayList<>();
+
+
+        PetriPWithFloorNumber elevatorAvailableOn1FloorPlace = new PetriPWithFloorNumber("ElevatorAvailableOn1Floor", 0, 1);
+        PetriPWithFloorNumber elevatorAvailableOn2FloorPlace = new PetriPWithFloorNumber("ElevatorAvailableOn2Floor", 0, 2);
+        PetriPWithFloorNumber elevatorAvailableOn3FloorPlace = new PetriPWithFloorNumber("ElevatorAvailableOn3Floor", 0, 3);
+        PetriPWithFloorNumber elevatorAvailableOn4FloorPlace = new PetriPWithFloorNumber("ElevatorAvailableOn4Floor", 0, 4);
+        PetriPWithFloorNumber elevatorAvailableOn5FloorPlace = new PetriPWithFloorNumber("ElevatorAvailableOn5Floor", 0, 5);
+        PetriPWithFloorNumber passengersTo1FloorPlace = new PetriPWithFloorNumber("PassengersTo1Floor", 0, 1);
+        PetriPWithFloorNumber passengersTo2FloorPlace = new PetriPWithFloorNumber("PassengersTo2Floor", 0, 2);
+        PetriPWithFloorNumber passengersTo3FloorPlace = new PetriPWithFloorNumber("PassengersTo3Floor", 0, 3);
+        PetriPWithFloorNumber passengersTo4FloorPlace = new PetriPWithFloorNumber("PassengersTo4Floor", 0, 4);
+        PetriPWithFloorNumber passengersTo5FloorPlace = new PetriPWithFloorNumber("PassengersTo5Floor", 0, 5);
+        PetriPWithFloorNumber passengersWaiting1FloorPlace = new PetriPWithFloorNumber("PassengersWaiting1Floor", 0, 1);
+        PetriPWithFloorNumber passengersWaiting2FloorPlace = new PetriPWithFloorNumber("PassengersWaiting2Floor", 0, 2);
+        PetriPWithFloorNumber passengersWaiting3FloorPlace = new PetriPWithFloorNumber("PassengersWaiting3Floor", 0, 3);
+        PetriPWithFloorNumber passengersWaiting4FloorPlace = new PetriPWithFloorNumber("PassengersWaiting4Floor", 0, 4);
+        PetriPWithFloorNumber passengersWaiting5FloorPlace = new PetriPWithFloorNumber("PassengersWaiting5Floor", 0, 5);
+
+        PetriP availablePlaces = new PetriP("AvailablePlaces", 0);
+        //add waiting move up down support
+
+
+        list.add(new FloorDecisionMaker(
+                1,
+                elevatorAvailableOn1FloorPlace,
+                null,
+                elevatorAvailableOn2FloorPlace,
+                new ArrayList<>(Arrays.asList(
+                        passengersTo2FloorPlace,
+                        passengersTo3FloorPlace,
+                        passengersTo4FloorPlace,
+                        passengersTo5FloorPlace
+                )),
+                new ArrayList<>(),
+                new ArrayList<>(Arrays.asList(
+                        passengersWaiting2FloorPlace,
+                        passengersWaiting3FloorPlace,
+                        passengersWaiting4FloorPlace,
+                        passengersWaiting5FloorPlace
+                )),
+                new ArrayList<>()
+        ));
+
+        list.add(new FloorDecisionMaker(
+                2,
+                elevatorAvailableOn2FloorPlace,
+                elevatorAvailableOn1FloorPlace,
+                elevatorAvailableOn3FloorPlace,
+                new ArrayList<>(Arrays.asList(
+                        passengersTo3FloorPlace,
+                        passengersTo4FloorPlace,
+                        passengersTo5FloorPlace
+                )),
+                new ArrayList<>(Collections.singletonList(
+                        passengersTo1FloorPlace
+                )),
+                new ArrayList<>(Arrays.asList(
+                        passengersWaiting3FloorPlace,
+                        passengersWaiting4FloorPlace,
+                        passengersWaiting5FloorPlace
+                )),
+                new ArrayList<>(Collections.singletonList(
+                        passengersWaiting1FloorPlace
+                ))
+        ));
+
+        list.add(new FloorDecisionMaker(
+                3,
+                elevatorAvailableOn3FloorPlace,
+                elevatorAvailableOn2FloorPlace,
+                elevatorAvailableOn4FloorPlace,
+                new ArrayList<>(Arrays.asList(
+                        passengersTo4FloorPlace,
+                        passengersTo5FloorPlace
+                )),
+                new ArrayList<>(Arrays.asList(
+                        passengersTo1FloorPlace,
+                        passengersTo2FloorPlace
+                )),
+                new ArrayList<>(Arrays.asList(
+                        passengersWaiting4FloorPlace,
+                        passengersWaiting5FloorPlace
+                )),
+                new ArrayList<>(Arrays.asList(
+                        passengersWaiting1FloorPlace,
+                        passengersWaiting2FloorPlace
+                ))
+        ));
+
+        list.add(new FloorDecisionMaker(
+                4,
+                elevatorAvailableOn4FloorPlace,
+                elevatorAvailableOn3FloorPlace,
+                elevatorAvailableOn5FloorPlace,
+                new ArrayList<>(Collections.singletonList(
+                        passengersTo5FloorPlace
+                )),
+                new ArrayList<>(Arrays.asList(
+                        passengersTo1FloorPlace,
+                        passengersTo2FloorPlace,
+                        passengersTo3FloorPlace
+                )),
+                new ArrayList<>(Collections.singletonList(
+                        passengersWaiting5FloorPlace
+                )),
+                new ArrayList<>(Arrays.asList(
+                        passengersWaiting1FloorPlace,
+                        passengersWaiting2FloorPlace,
+                        passengersWaiting3FloorPlace
+                ))
+        ));
+
+        list.add(new FloorDecisionMaker(
+                5,
+                elevatorAvailableOn5FloorPlace,
+                elevatorAvailableOn4FloorPlace,
+                null,
+                new ArrayList<>(),
+                new ArrayList<>(Arrays.asList(
+                        passengersTo1FloorPlace,
+                        passengersTo2FloorPlace,
+                        passengersTo3FloorPlace,
+                        passengersTo4FloorPlace
+                )),
+                new ArrayList<>(),
+                new ArrayList<>(Arrays.asList(
+                        passengersWaiting1FloorPlace,
+                        passengersWaiting2FloorPlace,
+                        passengersWaiting3FloorPlace,
+                        passengersWaiting4FloorPlace
+                ))
+        ));
+
+
+        list.add(new FloorActivity(
+                1,
+                elevatorAvailableOn1FloorPlace,
+                availablePlaces,
+                passengersTo1FloorPlace,
+
+        ));
+
+
+        return new PetriObjModel(list);
+    }
 }
 
 
