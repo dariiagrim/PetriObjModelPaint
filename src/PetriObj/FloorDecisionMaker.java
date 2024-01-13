@@ -12,7 +12,8 @@ public class FloorDecisionMaker extends PetriSim {
             ArrayList<PetriPWithFloorNumber> passengersToUpPositions,
             ArrayList<PetriPWithFloorNumber> passengersToDownPositions,
             ArrayList<PetriPWithFloorNumber> passengersWaitingUpPositions,
-            ArrayList<PetriPWithFloorNumber> passengersWaitingDownPositions
+            ArrayList<PetriPWithFloorNumber> passengersWaitingDownPositions,
+            ArrayList<PetriP> sharedPlaces
     ) throws ExceptionInvalidTimeDelay {
         super(createNet(
                 floorNumber,
@@ -22,7 +23,8 @@ public class FloorDecisionMaker extends PetriSim {
                 passengersToUpPositions,
                 passengersToDownPositions,
                 passengersWaitingUpPositions,
-                passengersWaitingDownPositions
+                passengersWaitingDownPositions,
+                sharedPlaces
         ));
     }
 
@@ -35,16 +37,18 @@ public class FloorDecisionMaker extends PetriSim {
             ArrayList<PetriPWithFloorNumber> passengersToUpPositions,
             ArrayList<PetriPWithFloorNumber> passengersToDownPositions,
             ArrayList<PetriPWithFloorNumber> passengersWaitingUpPositions,
-            ArrayList<PetriPWithFloorNumber> passengersWaitingDownPositions
+            ArrayList<PetriPWithFloorNumber> passengersWaitingDownPositions,
+            ArrayList<PetriP> sharedPlaces
     ) throws ExceptionInvalidTimeDelay {
         boolean isLastFloor = floorNumber == 5;
         boolean isFirstFloor = floorNumber == 1;
 
-        ArrayList<PetriP> d_P = new ArrayList<>();
+        PetriP.setNext(sharedPlaces.size());
+
+        ArrayList<PetriP> d_P = new ArrayList<>(sharedPlaces);
         ArrayList<PetriT> d_T = new ArrayList<>();
         ArrayList<ArcIn> d_In = new ArrayList<>();
         ArrayList<ArcOut> d_Out = new ArrayList<>();
-
 
         PetriT decideTransition = new PetriT(String.format("Decide%dFloor", floorNumber), 0.0);
         d_T.add(decideTransition);
@@ -70,6 +74,7 @@ public class FloorDecisionMaker extends PetriSim {
             moveDownTransition.setPriority(2);
             d_T.add(moveDownTransition);
             d_In.add(new ArcIn(moveDownPlace, moveDownTransition, 1));
+            d_In.add(new ArcIn(elevatorAvailableOnFloorPlace, moveDownTransition, 1));
             d_Out.add(new ArcOut(moveDownTransition, elevatorAvailableOnPreviousFloorPlace, 1));
 
             for (PetriPWithFloorNumber p : passengersToDownPositions) {
@@ -109,6 +114,7 @@ public class FloorDecisionMaker extends PetriSim {
             moveUpTransition.setPriority(2);
             d_T.add(moveUpTransition);
             d_In.add(new ArcIn(moveUpPlace, moveUpTransition, 1));
+            d_In.add(new ArcIn(elevatorAvailableOnFloorPlace, moveUpTransition, 1));
             d_Out.add(new ArcOut(moveUpTransition, elevatorAvailableOnNextFloorPlace, 1));
 
             for (PetriPWithFloorNumber p : passengersToUpPositions) {

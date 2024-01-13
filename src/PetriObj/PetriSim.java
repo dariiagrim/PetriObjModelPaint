@@ -379,37 +379,37 @@ public class PetriSim implements Cloneable, Serializable {
     public void input() {//вхід маркерів в переходи Петрі-об'єкта
         ArrayList<PetriT> activeT = this.findActiveT();//формування списку активних переходів
 
-        System.out.println("\n----INPUT current time: " + this.getCurrentTime());
-        printMark();
-        Vector<Integer> beforeMarkers = new Vector<>();
-        for (PetriP p : listP) {
-            beforeMarkers.add(p.getMark());
-        }
-        for (PetriT aT : activeT) {
-            System.out.println(aT.getName());
-        }
         if (activeT.isEmpty() && isBufferEmpty()) { //зупинка імітації за умови, що
             //не має переходів, які запускаються,і не має маркерів у переходах
             timeMin = Double.MAX_VALUE;
             //eventMin = null;  // 19.07.2018 by Sasha animation
         } else {
+            System.out.printf("\n----INPUT %s, current time: %f%n", this.getName(), this.getCurrentTime());
+            printMark();
+            Vector<Integer> beforeMarkers = new Vector<>();
+            for (PetriP p : listP) {
+                beforeMarkers.add(p.getMark());
+            }
+            for (PetriT aT : activeT) {
+                System.out.println(aT.getName());
+            }
             while (!activeT.isEmpty()) {//запуск переходів доки можливо
 
                 this.doConflikt(activeT).actIn(listP, this.getCurrentTime()); //розв'язання конфліктів
                 activeT = this.findActiveT(); //оновлення списку активних переходів
             }
-            this.eventMin();//знайти найближчу подію та ії час
-        }
-        printMark();
-        Vector<Integer> afterMarkers = new Vector<>();
-        for (PetriP p : listP) {
-            afterMarkers.add(p.getMark());
-        }
-
-        for (int i = 0; i < afterMarkers.size(); i++) {
-            if (!afterMarkers.get(i).equals(beforeMarkers.get(i))) {
-                System.out.println(listP[i].getName() + " diff: " + (afterMarkers.get(i) - beforeMarkers.get(i)));
+            this.eventMin();
+            printMark();
+            Vector<Integer> afterMarkers = new Vector<>();
+            for (PetriP p : listP) {
+                afterMarkers.add(p.getMark());
             }
+
+            for (int i = 0; i < afterMarkers.size(); i++) {
+                if (!afterMarkers.get(i).equals(beforeMarkers.get(i))) {
+                    System.out.println(listP[i].getName() + " diff: " + (afterMarkers.get(i) - beforeMarkers.get(i)));
+                }
+            }//знайти найближчу подію та ії час
         }
     }
 

@@ -234,7 +234,12 @@ public class PetriP extends PetriMainElement implements Cloneable, Serializable 
         number = n;
     }
 
-    
+    public static void setNext(int n) {
+        next = n;
+    }
+
+
+
     /**
      *
      * @return PetriP object with parameters which copy current parameters of
