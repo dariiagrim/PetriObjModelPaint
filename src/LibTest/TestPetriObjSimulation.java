@@ -18,11 +18,101 @@ import java.util.Collections;
 public class TestPetriObjSimulation {
     public static void main(String[] args) throws ExceptionInvalidTimeDelay, ExceptionInvalidNetStructure {
 
-
         PetriObjModel model = getCourseworkModel();
         model.setIsProtokol(false);
 
-        model.go(1000);
+        model.go(2000);
+
+
+        PetriNet floorActivity1 = model.getListObj().get(5).getNet();
+        PetriNet floorActivity2 = model.getListObj().get(6).getNet();
+        PetriNet floorActivity3 = model.getListObj().get(7).getNet();
+        PetriNet floorActivity4 = model.getListObj().get(8).getNet();
+        PetriNet floorActivity5 = model.getListObj().get(9).getNet();
+
+
+        ArrayList<PetriNet> floorActivities = new ArrayList<>(Arrays.asList(
+                floorActivity1,
+                floorActivity2,
+                floorActivity3,
+                floorActivity4,
+                floorActivity5
+        ));
+
+        for (int i = 0; i < floorActivities.size(); i++) {
+            PetriT[] transitions = floorActivities.get(i).getListT();
+            ArrayList<Double> startWaitingUpMoments = null;
+            ArrayList<Double> finishWaitingUpMoments = null;
+            ArrayList<Double> startWaitingDownMoments = null;
+            ArrayList<Double> finishWaitingDownMoments = null;
+
+            int floorNumber = i+1;
+
+            switch (floorNumber) {
+                case 1:
+                    startWaitingUpMoments = transitions[1].getOutMoments();
+                    finishWaitingUpMoments = transitions[2].getInMoments();
+                    break;
+                case 2:
+                    startWaitingUpMoments = transitions[3].getOutMoments();
+                    finishWaitingUpMoments = transitions[4].getInMoments();
+                    startWaitingDownMoments = transitions[2].getOutMoments();
+                    finishWaitingDownMoments = transitions[8].getInMoments();
+                    break;
+                case 3:
+                    startWaitingUpMoments = transitions[3].getOutMoments();
+                    finishWaitingUpMoments = transitions[4].getInMoments();
+                    startWaitingDownMoments = transitions[2].getOutMoments();
+                    finishWaitingDownMoments = transitions[7].getInMoments();
+                    break;
+                case 4:
+                    startWaitingUpMoments = transitions[3].getOutMoments();
+                    finishWaitingUpMoments = transitions[4].getInMoments();
+                    startWaitingDownMoments = transitions[2].getOutMoments();
+                    finishWaitingDownMoments = transitions[6].getInMoments();
+                    break;
+                case 5:
+                    startWaitingDownMoments = transitions[1].getOutMoments();
+                    finishWaitingDownMoments = transitions[2].getInMoments();
+                    break;
+            }
+
+            if (startWaitingDownMoments != null && finishWaitingDownMoments != null) {
+                double diffSum = 0.0;
+
+                for (int j = 0; j < finishWaitingDownMoments.size(); j++) {
+                    diffSum += finishWaitingDownMoments.get(i) - startWaitingDownMoments.get(i);
+                }
+
+                System.out.printf("Mean waiting time down %d floor: %f%n", i + 1, diffSum / (double) finishWaitingDownMoments.size());
+            }
+
+            if (startWaitingUpMoments != null && finishWaitingUpMoments != null) {
+                double diffSum = 0.0;
+
+                int startIndex = 0;
+                double divider = finishWaitingUpMoments.size();
+
+                if (i == 0) {
+                    startIndex = 1;
+                    divider--;
+                }
+
+
+
+                for (int j = startIndex; j < finishWaitingUpMoments.size(); j++) {
+                    int startWaitingUpMomentIndex  = j;
+                    if (i == 0) {
+                        startWaitingUpMomentIndex = j - 1;
+                    }
+                    diffSum += finishWaitingUpMoments.get(j) - startWaitingUpMoments.get(startWaitingUpMomentIndex);
+                }
+
+                System.out.printf("Mean waiting time up %d floor: %f%n", i + 1, diffSum / divider);
+            }
+
+
+        }
 
     }
 

@@ -81,19 +81,22 @@ public class FloorActivity extends PetriSim {
                 d_Out.add(new ArcOut(spendTimeTransition, readyToLeavePlace, 1));
 
                 PetriT readyToMoveDownTransition = new PetriT(String.format("ReadyToMoveDown%dFloor", floorNumber), 0.0);
-                exitTransition.setProbability(getProbabilityToMoveDownProbabilityForFloor(floorNumber));
+                readyToMoveDownTransition.setProbability(getProbabilityToMoveDownProbabilityForFloor(floorNumber));
+                readyToMoveDownTransition.setMoments(true);
                 d_T.add(readyToMoveDownTransition);
                 d_In.add(new ArcIn(readyToLeavePlace, readyToMoveDownTransition, 1));
                 d_Out.add(new ArcOut(readyToMoveDownTransition, passengerWaitingOnThisFloorToMoveDown, 1));
                 d_Out.add(new ArcOut(readyToMoveDownTransition, passengerWaitingOnThisFloor, 1));
 
                 PetriT readyToMoveUpTransition = new PetriT(String.format("ReadyToMoveUp%dFloor", floorNumber), 0.0);
-                exitTransition.setProbability(getProbabilityToMoveUpProbabilityForFloor(floorNumber));
+                readyToMoveUpTransition.setMoments(true);
+                readyToMoveUpTransition.setProbability(getProbabilityToMoveUpProbabilityForFloor(floorNumber));
                 d_T.add(readyToMoveUpTransition);
                 d_In.add(new ArcIn(readyToLeavePlace, readyToMoveUpTransition, 1));
                 d_Out.add(new ArcOut(readyToMoveUpTransition, passengerWaitingOnThisFloorToMoveUp, 1));
                 d_Out.add(new ArcOut(readyToMoveUpTransition, passengerWaitingOnThisFloor, 1));
             } else {
+                spendTimeTransition.setMoments(true);
                 d_Out.add(new ArcOut(spendTimeTransition, passengerWaitingOnThisFloorToMoveDown, 1));
                 d_Out.add(new ArcOut(spendTimeTransition, passengerWaitingOnThisFloor, 1));
             }
@@ -103,6 +106,7 @@ public class FloorActivity extends PetriSim {
 
             PetriT arriveTransition = new PetriT(String.format("Arrive%dFloor", floorNumber), 1.0);
             arriveTransition.setDistribution("exp", arriveTransition.getTimeServ());
+            arriveTransition.setMoments(true);
             d_T.add(arriveTransition);
 
             d_In.add(new ArcIn(toArrivePlace, arriveTransition, 1));
@@ -116,6 +120,7 @@ public class FloorActivity extends PetriSim {
         if (!isLastFloor) {
             PetriT enterToMoveUpTransition = new PetriT(String.format("EnterToMoveUp%dFloor", floorNumber), 0);
             enterToMoveUpTransition.setPriority(5);
+            enterToMoveUpTransition.setMoments(true);
             d_T.add(enterToMoveUpTransition);
             d_In.add(new ArcIn(elevatorAvailableOnFloorPlace, enterToMoveUpTransition, 1));
             d_In.add(new ArcIn(availablePlacesPlace, enterToMoveUpTransition, 1));
@@ -141,6 +146,7 @@ public class FloorActivity extends PetriSim {
         if (!isFirstFloor) {
             PetriT enterToMoveDownTransition = new PetriT(String.format("EnterToMoveDown%dFloor", floorNumber), 0);
             enterToMoveDownTransition.setPriority(5);
+            enterToMoveDownTransition.setMoments(true);
             d_T.add(enterToMoveDownTransition);
             d_In.add(new ArcIn(elevatorAvailableOnFloorPlace, enterToMoveDownTransition, 1));
             d_In.add(new ArcIn(availablePlacesPlace, enterToMoveDownTransition, 1));
