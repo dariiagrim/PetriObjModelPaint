@@ -169,7 +169,6 @@ public class TestPetriObjSimulation {
         ));
 
 
-
         ArrayList<Double> allFloorsStartMoveMoments = new ArrayList<>();
         ArrayList<Double> allFloorsFinishMoveMoments = new ArrayList<>();
 
@@ -210,6 +209,83 @@ public class TestPetriObjSimulation {
         System.out.println(allFloorsFinishMoveMoments);
 
 
+        int startMoveIndex = 0;
+        int finishMoveIndex = 0;
+        int enterElevatorIndex = 0;
+        int exitElevatorIndex = 0;
+
+        int availablePlaces = 6;
+
+        double currentTime = 0;
+
+        double timeMoveWithPassengers = 0;
+        double timeMoveWithoutPassengers = 0;
+        double timeDoNotMove = 0;
+
+        double timeMove =0;
+
+
+        double lastStartMoveTime = 0;
+        double lastFinishMoveTime = 0;
+
+
+        while (true) {
+            if (startMoveIndex == allFloorsStartMoveMoments.size() ||
+                    finishMoveIndex == allFloorsFinishMoveMoments.size() ||
+                    enterElevatorIndex == allFloorsEnterElevatorMoments.size() ||
+                    exitElevatorIndex == allFloorsExitElevatorMoments.size()) {
+                break;
+            }
+
+            double enterElevatorTime = allFloorsEnterElevatorMoments.get(enterElevatorIndex);
+            double startMoveTime = allFloorsStartMoveMoments.get(startMoveIndex);
+            double finishMoveTime = allFloorsFinishMoveMoments.get(finishMoveIndex);
+            double exitElevatorTime = allFloorsExitElevatorMoments.get(exitElevatorIndex);
+
+
+            if(finishMoveTime <= startMoveTime && finishMoveTime <= enterElevatorTime && finishMoveTime <= exitElevatorTime) {
+                lastFinishMoveTime = finishMoveTime;
+                finishMoveIndex++;
+
+
+                if (availablePlaces == 6) {
+                    timeMoveWithoutPassengers += lastFinishMoveTime - lastStartMoveTime;
+                } else {
+                    timeMoveWithPassengers += lastFinishMoveTime - lastStartMoveTime;
+                }
+
+
+                continue;
+            }
+
+            if(exitElevatorTime <= finishMoveTime && exitElevatorTime <= startMoveTime && exitElevatorTime <= enterElevatorTime) {
+                exitElevatorIndex++;
+
+                availablePlaces++;
+
+                continue;
+            }
+
+            if(enterElevatorTime <= finishMoveTime && enterElevatorTime <= startMoveTime && enterElevatorTime <= exitElevatorTime) {
+                enterElevatorIndex++;
+
+                availablePlaces--;
+
+                continue;
+            }
+
+
+            if(startMoveTime <= finishMoveTime && startMoveTime <= enterElevatorTime && startMoveTime <= exitElevatorTime) {
+                lastStartMoveTime = startMoveTime;
+                startMoveIndex++;
+
+                timeDoNotMove += lastStartMoveTime - lastFinishMoveTime;
+            }
+        }
+
+        System.out.println("Time do not move: " + timeDoNotMove/1000.0);
+        System.out.println("Time move with passengers: " + timeMoveWithPassengers/1000.0);
+        System.out.println("Time move without passengers: " + timeMoveWithoutPassengers/1000.0);
 
     }
 
