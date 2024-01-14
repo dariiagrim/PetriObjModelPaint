@@ -49,6 +49,7 @@ public class FloorActivity extends PetriSim {
 
         PetriT exitTransition = new PetriT(String.format("Exit%dFloor", floorNumber), 0.0);
         exitTransition.setPriority(10);
+        exitTransition.setMoments(true);
         d_T.add(exitTransition);
         d_In.add(new ArcIn(elevatorAvailableOnFloorPlace, exitTransition, 1));
         d_Out.add(new ArcOut(exitTransition, elevatorAvailableOnFloorPlace, 1));

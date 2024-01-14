@@ -63,6 +63,8 @@ public class PetriT extends PetriMainElement implements Cloneable, Serializable 
     private String priorityParamName = null;
     private String probabilityParamName = null;
 
+    private boolean countPassengersOverflowTransition = false;
+
     /**
      * @param n  name of transition
      * @param tS timed delay
@@ -769,6 +771,15 @@ public class PetriT extends PetriMainElement implements Cloneable, Serializable 
     public void setMoments(boolean moments) {
         this.moments = moments;
     }
+
+    public void setCountPassengersOverflowTransition(boolean countPassengersOverflowTransition) {
+        this.countPassengersOverflowTransition = countPassengersOverflowTransition;
+    }
+
+    public boolean getCountPassengersOverflowTransition() {
+       return this.countPassengersOverflowTransition;
+    }
+
 
 
     public class EventMoments {

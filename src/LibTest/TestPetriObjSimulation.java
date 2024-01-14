@@ -21,7 +21,7 @@ public class TestPetriObjSimulation {
         PetriObjModel model = getCourseworkModel();
         model.setIsProtokol(false);
 
-        model.go(2000);
+        model.go(1000);
 
 
         PetriNet floorActivity1 = model.getListObj().get(5).getNet();
@@ -46,7 +46,7 @@ public class TestPetriObjSimulation {
             ArrayList<Double> startWaitingDownMoments = null;
             ArrayList<Double> finishWaitingDownMoments = null;
 
-            int floorNumber = i+1;
+            int floorNumber = i + 1;
 
             switch (floorNumber) {
                 case 1:
@@ -99,9 +99,8 @@ public class TestPetriObjSimulation {
                 }
 
 
-
                 for (int j = startIndex; j < finishWaitingUpMoments.size(); j++) {
-                    int startWaitingUpMomentIndex  = j;
+                    int startWaitingUpMomentIndex = j;
                     if (i == 0) {
                         startWaitingUpMomentIndex = j - 1;
                     }
@@ -110,9 +109,107 @@ public class TestPetriObjSimulation {
 
                 System.out.printf("Mean waiting time up %d floor: %f%n", i + 1, diffSum / divider);
             }
+        }
 
+        PetriP availablePlacesPlace = model.getListObj().get(5).getNet().getListP()[15];
+
+        System.out.printf("Max number passengers: %d%n", 6 - availablePlacesPlace.getObservedMin());
+        System.out.printf("Mean number passengers: %f%n", 6 - availablePlacesPlace.getMean());
+
+        ArrayList<Double> allFloorsEnterElevatorMoments = new ArrayList<>();
+        ArrayList<Double> allFloorsExitElevatorMoments = new ArrayList<>();
+
+        for (int i = 0; i < floorActivities.size(); i++) {
+            PetriT[] transitions = floorActivities.get(i).getListT();
+            ArrayList<Double> enterElevatorMoments = new ArrayList<>();
+            ArrayList<Double> exitElevatorMoments = new ArrayList<>(transitions[0].getOutMoments());
+
+            int floorNumber = i + 1;
+
+            switch (floorNumber) {
+                case 1:
+                case 5:
+                    enterElevatorMoments.addAll(transitions[2].getInMoments());
+                    break;
+                case 2:
+                    enterElevatorMoments.addAll(transitions[4].getInMoments());
+                    enterElevatorMoments.addAll(transitions[8].getInMoments());
+                    break;
+                case 3:
+                    enterElevatorMoments.addAll(transitions[4].getInMoments());
+                    enterElevatorMoments.addAll(transitions[7].getInMoments());
+                    break;
+                case 4:
+                    enterElevatorMoments.addAll(transitions[4].getInMoments());
+                    enterElevatorMoments.addAll(transitions[6].getInMoments());
+                    break;
+            }
+
+            allFloorsEnterElevatorMoments.addAll(enterElevatorMoments);
+            allFloorsExitElevatorMoments.addAll(exitElevatorMoments);
+        }
+
+        Collections.sort(allFloorsEnterElevatorMoments);
+        Collections.sort(allFloorsExitElevatorMoments);
+
+
+        PetriNet floor1DecisionMaker = model.getListObj().get(0).getNet();
+        PetriNet floor2DecisionMaker = model.getListObj().get(1).getNet();
+        PetriNet floor3DecisionMaker = model.getListObj().get(2).getNet();
+        PetriNet floor4DecisionMaker = model.getListObj().get(3).getNet();
+        PetriNet floor5DecisionMaker = model.getListObj().get(4).getNet();
+
+
+        ArrayList<PetriNet> floorDecisionMakers = new ArrayList<>(Arrays.asList(
+                floor1DecisionMaker,
+                floor2DecisionMaker,
+                floor3DecisionMaker,
+                floor4DecisionMaker,
+                floor5DecisionMaker
+        ));
+
+
+
+        ArrayList<Double> allFloorsStartMoveMoments = new ArrayList<>();
+        ArrayList<Double> allFloorsFinishMoveMoments = new ArrayList<>();
+
+
+        for (int i = 0; i < floorDecisionMakers.size(); i++) {
+            PetriT[] transitions = floorDecisionMakers.get(i).getListT();
+
+            ArrayList<Double> startMoveMoments = new ArrayList<>(transitions[2].getInMoments());
+            ArrayList<Double> finishMoveMoments = new ArrayList<>(transitions[2].getOutMoments());
+
+            int floorNumber = i + 1;
+
+            switch (floorNumber) {
+                case 2:
+                    startMoveMoments.addAll(transitions[5].getInMoments());
+                    finishMoveMoments.addAll(transitions[5].getOutMoments());
+                    break;
+                case 3:
+                    startMoveMoments.addAll(transitions[7].getInMoments());
+                    finishMoveMoments.addAll(transitions[7].getOutMoments());
+                    break;
+                case 4:
+                    startMoveMoments.addAll(transitions[9].getInMoments());
+                    finishMoveMoments.addAll(transitions[9].getOutMoments());
+                    break;
+            }
+
+            allFloorsStartMoveMoments.addAll(startMoveMoments);
+            allFloorsFinishMoveMoments.addAll(finishMoveMoments);
 
         }
+
+
+        Collections.sort(allFloorsStartMoveMoments);
+        Collections.sort(allFloorsFinishMoveMoments);
+
+        System.out.println(allFloorsStartMoveMoments);
+        System.out.println(allFloorsFinishMoveMoments);
+
+
 
     }
 

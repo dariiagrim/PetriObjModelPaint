@@ -72,6 +72,7 @@ public class FloorDecisionMaker extends PetriSim {
             d_P.add(moveDownPlace);
             PetriT moveDownTransition = new PetriT(String.format("Move%dTo%d", floorNumber, floorNumber - 1), 0.4);
             moveDownTransition.setPriority(2);
+            moveDownTransition.setMoments(true);
             d_T.add(moveDownTransition);
             d_In.add(new ArcIn(moveDownPlace, moveDownTransition, 1));
             d_In.add(new ArcIn(elevatorAvailableOnFloorPlace, moveDownTransition, 1));
@@ -112,6 +113,7 @@ public class FloorDecisionMaker extends PetriSim {
             d_P.add(moveUpPlace);
             PetriT moveUpTransition = new PetriT(String.format("Move%dTo%d", floorNumber, floorNumber + 1), 0.4);
             moveUpTransition.setPriority(2);
+            moveUpTransition.setMoments(true);
             d_T.add(moveUpTransition);
             d_In.add(new ArcIn(moveUpPlace, moveUpTransition, 1));
             d_In.add(new ArcIn(elevatorAvailableOnFloorPlace, moveUpTransition, 1));

@@ -40,13 +40,16 @@ public class PetriSim implements Cloneable, Serializable {
     private ArrayList<PetriP> listPositionsForStatistica = new ArrayList<PetriP>();
     //..... з таким списком статистика спільних позицій працює правильно...
 
-    private String id; //unique number of object for server
+    private String id;//unique number of object for server
 
     /**
      * Constructs the Petri simulator with given Petri net and time modeling
      *
      * @param net Petri net that describes the dynamics of object
      */
+
+
+    private int overflowPassengers = 0;
     public PetriSim(PetriNet net) {
         this(net, new StateTime());
     }
@@ -430,6 +433,9 @@ public class PetriSim implements Cloneable, Serializable {
 
 
         if (this.getCurrentTime() <= this.getSimulationTime()) {
+            if (eventMin.getCountPassengersOverflowTransition()) {
+
+            }
             eventMin.actOut(listP, this.getCurrentTime());//здійснення події
             if (eventMin.getBuffer() > 0) {
                 boolean u = true;
@@ -700,4 +706,7 @@ public class PetriSim implements Cloneable, Serializable {
     }
 
 
+    public int getOverflowPassengers() {
+        return overflowPassengers;
+    }
 }
