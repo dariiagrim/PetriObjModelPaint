@@ -105,7 +105,7 @@ public class FloorActivity extends PetriSim {
             PetriP toArrivePlace = new PetriP(String.format("ToArrive%dFloor", floorNumber), 1);
             d_P.add(toArrivePlace);
 
-            PetriT arriveTransition = new PetriT(String.format("Arrive%dFloor", floorNumber), 1.0);
+            PetriT arriveTransition = new PetriT(String.format("Arrive%dFloor", floorNumber), 1);
             arriveTransition.setDistribution("exp", arriveTransition.getTimeServ());
             arriveTransition.setMoments(true);
             d_T.add(arriveTransition);

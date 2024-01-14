@@ -7,6 +7,7 @@ package LibTest;
 import LibNet.NetLibrary;
 import PetriObj.*;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,13 +18,14 @@ import java.util.Collections;
  */
 public class TestPetriObjSimulation {
     public static void main(String[] args) throws ExceptionInvalidTimeDelay, ExceptionInvalidNetStructure {
-
         PetriObjModel model = getCourseworkModel();
         model.setIsProtokol(false);
 
         model.go(1000);
+    }
 
 
+    public static void calcStats(PetriObjModel model) throws ExceptionInvalidTimeDelay, ExceptionInvalidNetStructure {
         PetriNet floorActivity1 = model.getListObj().get(5).getNet();
         PetriNet floorActivity2 = model.getListObj().get(6).getNet();
         PetriNet floorActivity3 = model.getListObj().get(7).getNet();
@@ -39,12 +41,19 @@ public class TestPetriObjSimulation {
                 floorActivity5
         ));
 
+        ArrayList<Double> allFloorsEnterElevatorMoments = new ArrayList<>();
+        ArrayList<Double> allFloorsExitElevatorMoments = new ArrayList<>();
+
+        int overflowCount = 0;
+
         for (int i = 0; i < floorActivities.size(); i++) {
             PetriT[] transitions = floorActivities.get(i).getListT();
             ArrayList<Double> startWaitingUpMoments = null;
             ArrayList<Double> finishWaitingUpMoments = null;
             ArrayList<Double> startWaitingDownMoments = null;
             ArrayList<Double> finishWaitingDownMoments = null;
+            ArrayList<Double> enterElevatorMoments = new ArrayList<>();
+            ArrayList<Double> exitElevatorMoments = new ArrayList<>(transitions[0].getOutMoments());
 
             int floorNumber = i + 1;
 
@@ -52,30 +61,41 @@ public class TestPetriObjSimulation {
                 case 1:
                     startWaitingUpMoments = transitions[1].getOutMoments();
                     finishWaitingUpMoments = transitions[2].getInMoments();
+                    enterElevatorMoments.addAll(transitions[2].getInMoments());
                     break;
                 case 2:
                     startWaitingUpMoments = transitions[3].getOutMoments();
                     finishWaitingUpMoments = transitions[4].getInMoments();
                     startWaitingDownMoments = transitions[2].getOutMoments();
                     finishWaitingDownMoments = transitions[8].getInMoments();
+                    enterElevatorMoments.addAll(transitions[4].getInMoments());
+                    enterElevatorMoments.addAll(transitions[8].getInMoments());
                     break;
                 case 3:
                     startWaitingUpMoments = transitions[3].getOutMoments();
                     finishWaitingUpMoments = transitions[4].getInMoments();
                     startWaitingDownMoments = transitions[2].getOutMoments();
                     finishWaitingDownMoments = transitions[7].getInMoments();
+                    enterElevatorMoments.addAll(transitions[4].getInMoments());
+                    enterElevatorMoments.addAll(transitions[7].getInMoments());
                     break;
                 case 4:
                     startWaitingUpMoments = transitions[3].getOutMoments();
                     finishWaitingUpMoments = transitions[4].getInMoments();
                     startWaitingDownMoments = transitions[2].getOutMoments();
                     finishWaitingDownMoments = transitions[6].getInMoments();
+                    enterElevatorMoments.addAll(transitions[4].getInMoments());
+                    enterElevatorMoments.addAll(transitions[6].getInMoments());
                     break;
                 case 5:
                     startWaitingDownMoments = transitions[1].getOutMoments();
                     finishWaitingDownMoments = transitions[2].getInMoments();
+                    enterElevatorMoments.addAll(transitions[2].getInMoments());
                     break;
             }
+
+            allFloorsEnterElevatorMoments.addAll(enterElevatorMoments);
+            allFloorsExitElevatorMoments.addAll(exitElevatorMoments);
 
             if (startWaitingDownMoments != null && finishWaitingDownMoments != null) {
                 double diffSum = 0.0;
@@ -108,46 +128,71 @@ public class TestPetriObjSimulation {
                 }
 
                 System.out.printf("Mean waiting time up %d floor: %f%n", i + 1, diffSum / divider);
+
+
+                // calculate not enter because overflow
+
+                ArrayList<Double> startWaitingMoments = new ArrayList<>();
+                if (floorNumber != 5) {
+                    startWaitingMoments.addAll(startWaitingUpMoments);
+                }
+                if (floorNumber != 1) {
+                    startWaitingMoments.addAll(startWaitingDownMoments);
+                }
+
+
+                int oldWaitingForElevatorNumber = 0;
+                int waitingForElevatorNumber = 0;
+                int enterElevatorIndex = 1;
+
+                Collections.sort(startWaitingMoments);
+                Collections.sort(enterElevatorMoments);
+
+                for (double startWaitingMoment : startWaitingMoments) {
+                    if (enterElevatorIndex >= enterElevatorMoments.size()) {
+                        break;
+                    }
+
+                    double enterElevatorTime = enterElevatorMoments.get(enterElevatorIndex);
+
+                    waitingForElevatorNumber++;
+
+                    if (startWaitingMoment >= enterElevatorTime) {
+                        while (startWaitingMoment >= enterElevatorTime) {
+                            if (oldWaitingForElevatorNumber > 0) {
+                                oldWaitingForElevatorNumber--;
+                            } else {
+                                waitingForElevatorNumber--;
+                            }
+
+                            enterElevatorIndex++;
+                            if (enterElevatorIndex == enterElevatorMoments.size()) {
+                                break;
+                            }
+                            enterElevatorTime = enterElevatorMoments.get(enterElevatorIndex);
+                        }
+
+                        overflowCount += waitingForElevatorNumber;
+                        oldWaitingForElevatorNumber += waitingForElevatorNumber;
+                        waitingForElevatorNumber = 0;
+                    }
+
+
+                }
+
             }
         }
+
+
+        ArrayList<Double> allFloorsStartMoveMoments = new ArrayList<>();
+        ArrayList<Double> allFloorsFinishMoveMoments = new ArrayList<>();
+
 
         PetriP availablePlacesPlace = model.getListObj().get(5).getNet().getListP()[15];
 
         System.out.printf("Max number passengers: %d%n", 6 - availablePlacesPlace.getObservedMin());
         System.out.printf("Mean number passengers: %f%n", 6 - availablePlacesPlace.getMean());
 
-        ArrayList<Double> allFloorsEnterElevatorMoments = new ArrayList<>();
-        ArrayList<Double> allFloorsExitElevatorMoments = new ArrayList<>();
-
-        for (int i = 0; i < floorActivities.size(); i++) {
-            PetriT[] transitions = floorActivities.get(i).getListT();
-            ArrayList<Double> enterElevatorMoments = new ArrayList<>();
-            ArrayList<Double> exitElevatorMoments = new ArrayList<>(transitions[0].getOutMoments());
-
-            int floorNumber = i + 1;
-
-            switch (floorNumber) {
-                case 1:
-                case 5:
-                    enterElevatorMoments.addAll(transitions[2].getInMoments());
-                    break;
-                case 2:
-                    enterElevatorMoments.addAll(transitions[4].getInMoments());
-                    enterElevatorMoments.addAll(transitions[8].getInMoments());
-                    break;
-                case 3:
-                    enterElevatorMoments.addAll(transitions[4].getInMoments());
-                    enterElevatorMoments.addAll(transitions[7].getInMoments());
-                    break;
-                case 4:
-                    enterElevatorMoments.addAll(transitions[4].getInMoments());
-                    enterElevatorMoments.addAll(transitions[6].getInMoments());
-                    break;
-            }
-
-            allFloorsEnterElevatorMoments.addAll(enterElevatorMoments);
-            allFloorsExitElevatorMoments.addAll(exitElevatorMoments);
-        }
 
         Collections.sort(allFloorsEnterElevatorMoments);
         Collections.sort(allFloorsExitElevatorMoments);
@@ -167,11 +212,6 @@ public class TestPetriObjSimulation {
                 floor4DecisionMaker,
                 floor5DecisionMaker
         ));
-
-
-        ArrayList<Double> allFloorsStartMoveMoments = new ArrayList<>();
-        ArrayList<Double> allFloorsFinishMoveMoments = new ArrayList<>();
-
 
         for (int i = 0; i < floorDecisionMakers.size(); i++) {
             PetriT[] transitions = floorDecisionMakers.get(i).getListT();
@@ -205,10 +245,6 @@ public class TestPetriObjSimulation {
         Collections.sort(allFloorsStartMoveMoments);
         Collections.sort(allFloorsFinishMoveMoments);
 
-        System.out.println(allFloorsStartMoveMoments);
-        System.out.println(allFloorsFinishMoveMoments);
-
-
         int startMoveIndex = 0;
         int finishMoveIndex = 0;
         int enterElevatorIndex = 0;
@@ -216,14 +252,9 @@ public class TestPetriObjSimulation {
 
         int availablePlaces = 6;
 
-        double currentTime = 0;
-
         double timeMoveWithPassengers = 0;
         double timeMoveWithoutPassengers = 0;
         double timeDoNotMove = 0;
-
-        double timeMove =0;
-
 
         double lastStartMoveTime = 0;
         double lastFinishMoveTime = 0;
@@ -243,7 +274,7 @@ public class TestPetriObjSimulation {
             double exitElevatorTime = allFloorsExitElevatorMoments.get(exitElevatorIndex);
 
 
-            if(finishMoveTime <= startMoveTime && finishMoveTime <= enterElevatorTime && finishMoveTime <= exitElevatorTime) {
+            if (finishMoveTime <= startMoveTime && finishMoveTime <= enterElevatorTime && finishMoveTime <= exitElevatorTime) {
                 lastFinishMoveTime = finishMoveTime;
                 finishMoveIndex++;
 
@@ -258,7 +289,7 @@ public class TestPetriObjSimulation {
                 continue;
             }
 
-            if(exitElevatorTime <= finishMoveTime && exitElevatorTime <= startMoveTime && exitElevatorTime <= enterElevatorTime) {
+            if (exitElevatorTime <= finishMoveTime && exitElevatorTime <= startMoveTime && exitElevatorTime <= enterElevatorTime) {
                 exitElevatorIndex++;
 
                 availablePlaces++;
@@ -266,7 +297,7 @@ public class TestPetriObjSimulation {
                 continue;
             }
 
-            if(enterElevatorTime <= finishMoveTime && enterElevatorTime <= startMoveTime && enterElevatorTime <= exitElevatorTime) {
+            if (enterElevatorTime <= finishMoveTime && enterElevatorTime <= startMoveTime && enterElevatorTime <= exitElevatorTime) {
                 enterElevatorIndex++;
 
                 availablePlaces--;
@@ -275,7 +306,7 @@ public class TestPetriObjSimulation {
             }
 
 
-            if(startMoveTime <= finishMoveTime && startMoveTime <= enterElevatorTime && startMoveTime <= exitElevatorTime) {
+            if (startMoveTime <= finishMoveTime && startMoveTime <= enterElevatorTime && startMoveTime <= exitElevatorTime) {
                 lastStartMoveTime = startMoveTime;
                 startMoveIndex++;
 
@@ -283,11 +314,13 @@ public class TestPetriObjSimulation {
             }
         }
 
-        System.out.println("Time do not move: " + timeDoNotMove/1000.0);
-        System.out.println("Time move with passengers: " + timeMoveWithPassengers/1000.0);
-        System.out.println("Time move without passengers: " + timeMoveWithoutPassengers/1000.0);
+        System.out.println("Time do not move: " + timeDoNotMove / 1000.0);
+        System.out.println("Time move with passengers: " + timeMoveWithPassengers / 1000.0);
+        System.out.println("Time move without passengers: " + timeMoveWithoutPassengers / 1000.0);
 
+        System.out.println("Overflow: " + overflowCount / (double) allFloorsEnterElevatorMoments.size());
     }
+
 
     public static void lab6Task2() throws ExceptionInvalidTimeDelay, ExceptionInvalidNetStructure {
         PetriObjModel model = getModelLab6Task2();
