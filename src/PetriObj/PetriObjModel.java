@@ -23,7 +23,7 @@ import javax.swing.JTextArea;
 public class PetriObjModel implements Serializable, Cloneable  {
 
     private ArrayList<PetriSim> listObj = new ArrayList<>();
-    private boolean protocolPrint = true;
+    private boolean protocolPrint = false;
     private boolean statistics = true;
     private ArrayList<LinkByPlaces> links; //added 29.11.2017 by Inna
     private StateTime timeState;

@@ -11,7 +11,12 @@ public class FloorActivity extends PetriSim {
             PetriP passengerWaitingOnThisFloor,
             ArrayList<PetriPWithFloorNumber> passengersToUpPlaces,
             ArrayList<PetriPWithFloorNumber> passengersToDownPlaces,
-            ArrayList<PetriP> sharedPlaces
+            ArrayList<PetriP> sharedPlaces,
+            double firstFloorArrivalFrequency,
+            double spendOnFloorTimeLowerLimit,
+            double spendOnFloorTimeUpperLimit,
+            double choose1FloorProbability,
+            double chooseOtherFloorProbability
     ) throws ExceptionInvalidTimeDelay {
         super(createNet(
                 floorNumber,
@@ -21,7 +26,12 @@ public class FloorActivity extends PetriSim {
                 passengerWaitingOnThisFloor,
                 passengersToUpPlaces,
                 passengersToDownPlaces,
-                sharedPlaces
+                sharedPlaces,
+                firstFloorArrivalFrequency,
+                spendOnFloorTimeLowerLimit,
+                spendOnFloorTimeUpperLimit,
+                choose1FloorProbability,
+                chooseOtherFloorProbability
         ));
         setPriority(5);
     }
@@ -35,7 +45,12 @@ public class FloorActivity extends PetriSim {
             PetriP passengerWaitingOnThisFloor,
             ArrayList<PetriPWithFloorNumber> passengersToUpPlaces,
             ArrayList<PetriPWithFloorNumber> passengersToDownPlaces,
-            ArrayList<PetriP> sharedPlaces
+            ArrayList<PetriP> sharedPlaces,
+            double firstFloorArrivalFrequency,
+            double spendOnFloorTimeLowerLimit,
+            double spendOnFloorTimeUpperLimit,
+            double choose1FloorProbability,
+            double chooseOtherFloorProbability
     ) throws ExceptionInvalidTimeDelay {
         boolean isLastFloor = floorNumber == 5;
         boolean isFirstFloor = floorNumber == 1;
@@ -70,9 +85,9 @@ public class FloorActivity extends PetriSim {
         d_P.add(passengerWaitingOnThisFloorToMoveDown);
 
         if (!isFirstFloor) {
-            PetriT spendTimeTransition = new PetriT(String.format("SpendTime%dFloor", floorNumber), 120);
+            PetriT spendTimeTransition = new PetriT(String.format("SpendTime%dFloor", floorNumber), spendOnFloorTimeUpperLimit);
             spendTimeTransition.setDistribution("unif", spendTimeTransition.getTimeServ());
-            spendTimeTransition.setParamDeviation(15.0);
+            spendTimeTransition.setParamDeviation(spendOnFloorTimeLowerLimit);
             d_T.add(spendTimeTransition);
             d_In.add(new ArcIn(exitedPlace, spendTimeTransition, 1));
 
@@ -82,7 +97,7 @@ public class FloorActivity extends PetriSim {
                 d_Out.add(new ArcOut(spendTimeTransition, readyToLeavePlace, 1));
 
                 PetriT readyToMoveDownTransition = new PetriT(String.format("ReadyToMoveDown%dFloor", floorNumber), 0.0);
-                readyToMoveDownTransition.setProbability(getProbabilityToMoveDownProbabilityForFloor(floorNumber));
+                readyToMoveDownTransition.setProbability(getProbabilityToMoveDownProbabilityForFloor(floorNumber, choose1FloorProbability, chooseOtherFloorProbability));
                 readyToMoveDownTransition.setMoments(true);
                 d_T.add(readyToMoveDownTransition);
                 d_In.add(new ArcIn(readyToLeavePlace, readyToMoveDownTransition, 1));
@@ -91,7 +106,7 @@ public class FloorActivity extends PetriSim {
 
                 PetriT readyToMoveUpTransition = new PetriT(String.format("ReadyToMoveUp%dFloor", floorNumber), 0.0);
                 readyToMoveUpTransition.setMoments(true);
-                readyToMoveUpTransition.setProbability(getProbabilityToMoveUpProbabilityForFloor(floorNumber));
+                readyToMoveUpTransition.setProbability(getProbabilityToMoveUpProbabilityForFloor(floorNumber, chooseOtherFloorProbability));
                 d_T.add(readyToMoveUpTransition);
                 d_In.add(new ArcIn(readyToLeavePlace, readyToMoveUpTransition, 1));
                 d_Out.add(new ArcOut(readyToMoveUpTransition, passengerWaitingOnThisFloorToMoveUp, 1));
@@ -105,7 +120,7 @@ public class FloorActivity extends PetriSim {
             PetriP toArrivePlace = new PetriP(String.format("ToArrive%dFloor", floorNumber), 1);
             d_P.add(toArrivePlace);
 
-            PetriT arriveTransition = new PetriT(String.format("Arrive%dFloor", floorNumber), 1);
+            PetriT arriveTransition = new PetriT(String.format("Arrive%dFloor", floorNumber), firstFloorArrivalFrequency);
             arriveTransition.setDistribution("exp", arriveTransition.getTimeServ());
             arriveTransition.setMoments(true);
             d_T.add(arriveTransition);
@@ -179,7 +194,10 @@ public class FloorActivity extends PetriSim {
         return d_Net;
     }
 
-    private static double getProbabilityToMoveFromFloorToFloor(int floorNumber, int toFloorNumber) {
+    private static double getProbabilityToMoveFromFloorToFloor(
+            int floorNumber,
+            int toFloorNumber
+    ) {
         switch (floorNumber) {
             case 1:
                 return 0.25;
@@ -219,29 +237,36 @@ public class FloorActivity extends PetriSim {
         }
     }
 
-    private static double getProbabilityToMoveUpProbabilityForFloor(int floorNumber) {
+    private static double getProbabilityToMoveUpProbabilityForFloor(
+            int floorNumber,
+            double chooseOtherFloorProbability
+    ) {
         switch (floorNumber) {
             case 1:
                 return 1;
             case 2:
-                return 0.3;
+                return chooseOtherFloorProbability * 3;
             case 3:
-                return 0.2;
+                return chooseOtherFloorProbability * 2;
             case 4:
-                return 0.1;
+                return chooseOtherFloorProbability;
             default:
                 return 0;
         }
     }
 
-    private static double getProbabilityToMoveDownProbabilityForFloor(int floorNumber) {
+    private static double getProbabilityToMoveDownProbabilityForFloor(
+            int floorNumber,
+            double choose1FloorProbability,
+            double chooseOtherFloorProbability
+    ) {
         switch (floorNumber) {
             case 2:
-                return 0.7;
+                return choose1FloorProbability;
             case 3:
-                return 0.8;
+                return choose1FloorProbability + chooseOtherFloorProbability;
             case 4:
-                return 0.9;
+                return choose1FloorProbability + chooseOtherFloorProbability * 2;
             case 5:
                 return 1;
             default:

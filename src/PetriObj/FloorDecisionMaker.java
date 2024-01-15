@@ -3,7 +3,6 @@ package PetriObj;
 import java.util.ArrayList;
 
 public class FloorDecisionMaker extends PetriSim {
-
     public FloorDecisionMaker(
             int floorNumber,
             PetriP elevatorAvailableOnFloorPlace,
@@ -13,7 +12,8 @@ public class FloorDecisionMaker extends PetriSim {
             ArrayList<PetriPWithFloorNumber> passengersToDownPositions,
             ArrayList<PetriPWithFloorNumber> passengersWaitingUpPositions,
             ArrayList<PetriPWithFloorNumber> passengersWaitingDownPositions,
-            ArrayList<PetriP> sharedPlaces
+            ArrayList<PetriP> sharedPlaces,
+            double floorMoveTime
     ) throws ExceptionInvalidTimeDelay {
         super(createNet(
                 floorNumber,
@@ -24,10 +24,10 @@ public class FloorDecisionMaker extends PetriSim {
                 passengersToDownPositions,
                 passengersWaitingUpPositions,
                 passengersWaitingDownPositions,
-                sharedPlaces
+                sharedPlaces,
+                floorMoveTime
         ));
     }
-
 
     public static PetriNet createNet(
             int floorNumber,
@@ -38,7 +38,8 @@ public class FloorDecisionMaker extends PetriSim {
             ArrayList<PetriPWithFloorNumber> passengersToDownPositions,
             ArrayList<PetriPWithFloorNumber> passengersWaitingUpPositions,
             ArrayList<PetriPWithFloorNumber> passengersWaitingDownPositions,
-            ArrayList<PetriP> sharedPlaces
+            ArrayList<PetriP> sharedPlaces,
+            double floorMoveTime
     ) throws ExceptionInvalidTimeDelay {
         boolean isLastFloor = floorNumber == 5;
         boolean isFirstFloor = floorNumber == 1;
@@ -70,7 +71,7 @@ public class FloorDecisionMaker extends PetriSim {
         if (!isFirstFloor) {
             PetriP moveDownPlace = new PetriP(String.format("MoveDown%dFloor", floorNumber), 0);
             d_P.add(moveDownPlace);
-            PetriT moveDownTransition = new PetriT(String.format("Move%dTo%d", floorNumber, floorNumber - 1), 0.4);
+            PetriT moveDownTransition = new PetriT(String.format("Move%dTo%d", floorNumber, floorNumber - 1), floorMoveTime);
             moveDownTransition.setPriority(2);
             moveDownTransition.setMoments(true);
             d_T.add(moveDownTransition);
@@ -111,7 +112,7 @@ public class FloorDecisionMaker extends PetriSim {
         if (!isLastFloor) {
             PetriP moveUpPlace = new PetriP(String.format("MoveUp%dFloor", floorNumber), 0);
             d_P.add(moveUpPlace);
-            PetriT moveUpTransition = new PetriT(String.format("Move%dTo%d", floorNumber, floorNumber + 1), 0.4);
+            PetriT moveUpTransition = new PetriT(String.format("Move%dTo%d", floorNumber, floorNumber + 1), floorMoveTime);
             moveUpTransition.setPriority(2);
             moveUpTransition.setMoments(true);
             d_T.add(moveUpTransition);
