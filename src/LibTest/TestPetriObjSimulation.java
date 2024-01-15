@@ -18,20 +18,20 @@ import java.util.Collections;
  */
 public class TestPetriObjSimulation {
     public static void main(String[] args) throws ExceptionInvalidTimeDelay, ExceptionInvalidNetStructure {
-        ElevatorObjModel model = new ElevatorObjModel(
-                1,
-                1,
-                1,
-                0.7,
-                0.1,
-                0.4,
-                6
-        );
-
-
-        model.go(10000);
-
-        model.calcStats();
+//        ElevatorObjModel model = new ElevatorObjModel(
+//                1,
+//                1,
+//                1,
+//                0.7,
+//                0.1,
+//                0.4,
+//                6
+//        );
+//
+//
+//        model.go(10000);
+//
+//        model.calcStats(100);
     }
 
 
